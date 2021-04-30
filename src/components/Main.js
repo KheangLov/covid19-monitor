@@ -91,11 +91,12 @@ const styles = theme => ({
 
 class Main extends Component {
   state = {
-    covidData: []
+    covidData: [],
+    covidAPIDomin: 'https://covid19.mathdro.id',
   };
 
   componentDidMount() {
-    axios.get('https://covid19.mathdro.id/api/countries/KH')
+    axios.get(`${this.state.covidAPIDomin}/api/countries/KH`)
       .then(({ data }) => {
         const khData = {
           order: 1,
@@ -122,7 +123,7 @@ class Main extends Component {
       })
       .catch(err => console.log(err));
 
-    axios.get('https://covid19.mathdro.id/api')
+    axios.get(`${this.state.covidAPIDomin}/api`)
       .then(({ data }) => {
         const allData = {
           order: 2,

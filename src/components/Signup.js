@@ -119,6 +119,7 @@ const getSteps = () => {
 
 class Signup extends Component {
   state = {
+    expressAPIUrl: process.env.REACT_APP_EXPRESS_API_URL ? process.env.REACT_APP_EXPRESS_API_URL : 'http://localhost:3000',
     activeStep: 0,
     receivingAccount: "",
     termsChecked: false,
@@ -138,6 +139,12 @@ class Signup extends Component {
     },
     errorMessage: {}
   };
+
+  componentDidMount() {
+    if (inMemoryJWTManager.getToken()) {
+      this.setState({ activeStep: 2 });
+    }
+  }
 
   handleNext = () => {
     this.setState(state => ({
@@ -180,26 +187,55 @@ class Signup extends Component {
     this.setState({ values: { ...this.state.values, showPassword: !this.state.values.showPassword } });
   };
 
-  handleMouseDownPassword = (event) => {
+  handleMouseDownPassword = event => {
     event.preventDefault();
   };
 
+  handleError = data => {
+    if (data && data.errors && data.errors.length) {
+      data.errors.forEach(({ field, messages }) => {
+        let obj = {};
+        obj[field] = messages.length ? messages.join(', ') : '';
+        this.setState({
+          errorMessage: {
+            ...this.state.errorMessage,
+            ...obj
+          }
+        });
+      });
+    } else if (data && data.message) {
+      const { message } = data;
+      this.setState({
+        errorMessage: {
+          email: message,
+          password: message,
+        }
+      });
+    }
+  }
+
   handleRegister = () => {
-    axios.post('http://localhost:3000/v1/auth/register', this.state.formData)
+    axios.post(`${this.state.expressAPIUrl}/v1/auth/register`, this.state.formData)
       .then(({ data }) => {        
         inMemoryJWTManager.setToken(data);
-        this.handleNext();       
+        this.setState({ activeStep: 2 });
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        const { response: { data } } = err;
+        this.handleError(data);
+      });
   };
 
   handleLogin = () => {
-    axios.post('http://localhost:3000/v1/auth/login', this.state.formData)
+    axios.post(`${this.state.expressAPIUrl}/v1/auth/login`, this.state.formData)
       .then(({ data }) => {        
         inMemoryJWTManager.setToken(data);
-        this.handleNext();       
+        this.handleNext() 
       })
-      .catch(err => console.log(err));
+      .catch(err => {
+        const { response: { data } } = err;
+        this.handleError(data);
+      });
   };
 
   stepActions() {
@@ -215,13 +251,16 @@ class Signup extends Component {
   render() {
     const { classes } = this.props;
     const steps = getSteps();
-    const { activeStep, loading, values } = this.state;
+    const { activeStep, loading, values, errorMessage } = this.state;
     let user = {};
-    if (inMemoryJWTManager.getToken()) {
-      this.setState({ activeStep: 2 });
-      user = JSON.parse(inMemoryJWTManager.getToken()).user;
+    const token = inMemoryJWTManager.getToken();
+    if (token) {
+      user = JSON.parse(token).user;
     }
-    console.log(user);
+
+    const noEmailError = !errorMessage.email;
+    const noPasswordError = !errorMessage.password;
+    const noNameError = !errorMessage.name;
 
     return (
       <React.Fragment>
@@ -260,18 +299,23 @@ class Signup extends Component {
                     <div className={classes.smallContainer}>
                       <Paper className={classes.paper}>
                         <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
-                          <InputLabel htmlFor="outlined-adornment-name">Name</InputLabel>
+                          <InputLabel error={!noNameError} htmlFor="outlined-adornment-name">Name</InputLabel>
                           <OutlinedInput
+                            error={!noNameError}
                             id="outlined-adornment-name"
                             aria-describedby="outlined-name-helper-text"
                             labelWidth={45}
                             name="name"
                             onChange={this.handleChange}
                           />
+                          <FormHelperText error={!noNameError} id="outlined-password-helper-text">
+                            {!noNameError && errorMessage.name}
+                          </FormHelperText>
                         </FormControl>
                         <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
-                          <InputLabel htmlFor="outlined-adornment-email">Email</InputLabel>
+                          <InputLabel error={!noEmailError} htmlFor="outlined-adornment-email">Email</InputLabel>
                           <OutlinedInput
+                            error={!noEmailError}
                             id="outlined-adornment-email"
                             type="email"
                             name="email"
@@ -279,10 +323,14 @@ class Signup extends Component {
                             labelWidth={42}
                             onChange={this.handleChange}
                           />
+                          <FormHelperText error={!noEmailError} id="outlined-password-helper-text">
+                            {!noEmailError && errorMessage.email}
+                          </FormHelperText>
                         </FormControl>
                         <FormControl fullWidth variant="outlined">
-                          <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                          <InputLabel error={!noPasswordError} htmlFor="outlined-adornment-password">Password</InputLabel>
                           <OutlinedInput
+                            error={!noPasswordError}
                             id="outlined-adornment-password"
                             type={values.showPassword ? 'text' : 'password'}
                             name="password"
@@ -301,7 +349,9 @@ class Signup extends Component {
                             }
                             labelWidth={70}
                           />
-                          <FormHelperText id="outlined-password-helper-text"></FormHelperText>
+                          <FormHelperText error={!noPasswordError} id="outlined-password-helper-text">
+                            {!noPasswordError && errorMessage.password}
+                          </FormHelperText>
                         </FormControl>
                       </Paper>
                     </div>
@@ -310,8 +360,9 @@ class Signup extends Component {
                     <div className={classes.smallContainer}>
                       <Paper className={classes.paper}>
                         <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
-                          <InputLabel htmlFor="outlined-adornment-email">Email</InputLabel>
+                          <InputLabel error={!noEmailError} htmlFor="outlined-adornment-email">Email</InputLabel>
                           <OutlinedInput
+                            error={!noEmailError}
                             id="outlined-adornment-email"
                             type="email"
                             name="email"
@@ -319,10 +370,14 @@ class Signup extends Component {
                             labelWidth={42}
                             onChange={this.handleChange}
                           />
+                          <FormHelperText error={!noEmailError} id="outlined-password-helper-text">
+                            {!noEmailError && errorMessage.email}
+                          </FormHelperText>
                         </FormControl>
                         <FormControl fullWidth variant="outlined">
-                          <InputLabel htmlFor="outlined-adornment-password">Password</InputLabel>
+                          <InputLabel error={!noPasswordError} htmlFor="outlined-adornment-password">Password</InputLabel>
                           <OutlinedInput
+                            error={!noPasswordError}
                             id="outlined-adornment-password"
                             type={values.showPassword ? 'text' : 'password'}
                             name="password"
@@ -341,7 +396,9 @@ class Signup extends Component {
                             }
                             labelWidth={70}
                           />
-                          <FormHelperText id="outlined-password-helper-text"></FormHelperText>
+                          <FormHelperText error={!noPasswordError} id="outlined-password-helper-text">
+                            {!noPasswordError && errorMessage.password}
+                          </FormHelperText>
                         </FormControl>
                       </Paper>
                     </div>
@@ -351,7 +408,7 @@ class Signup extends Component {
                       <Paper className={classes.paper}>
                         <div>
                           <div style={{ marginBottom: 32 }}>
-                            <Typography variant="subtitle1" gutterBottom>
+                            <Typography variant="subtitle1" gutterBottom style={{ color: "rgb(5, 181, 132)" }}>
                               Login Success
                             </Typography>
                             <Typography variant="body1" gutterBottom>
@@ -367,7 +424,7 @@ class Signup extends Component {
                                 {user.email ? (
                                   <ListItem>
                                     <ListItemIcon>
-                                      <DoneIcon />
+                                      <DoneIcon style={{ color: "rgb(5, 181, 132)" }} />
                                     </ListItemIcon>
                                     <ListItemText
                                       inset
@@ -378,7 +435,7 @@ class Signup extends Component {
                                 {user.name ? (
                                   <ListItem>
                                     <ListItemIcon>
-                                      <DoneIcon />
+                                      <DoneIcon style={{ color: "rgb(5, 181, 132)" }} />
                                     </ListItemIcon>
                                     <ListItemText
                                       inset
@@ -452,7 +509,7 @@ class Signup extends Component {
                           className={classes.backButton}
                           size="large"
                         >
-                          Cancel
+                          Logout
                         </Button>
                       )}
                       {activeStep === 0 ? (

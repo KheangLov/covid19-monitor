@@ -1,3 +1,5 @@
+import inMemoryJWTManager from '../inMemoryJwt';
+
 const Menu = [
   {
     label: "Data",
@@ -8,7 +10,7 @@ const Menu = [
   //   pathname: "/dashboard"
   // },
   {
-    label: "Login & Register",
+    label: inMemoryJWTManager.getToken() ? "Logged" : "Login & Register",
     pathname: "/auth"
   },
   // {
