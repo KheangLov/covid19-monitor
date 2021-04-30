@@ -218,7 +218,7 @@ class Signup extends Component {
     const { activeStep, loading, values } = this.state;
     let user = {};
     if (inMemoryJWTManager.getToken()) {
-      this.state.activeStep = 2;
+      this.setState({ activeStep: 2 });
       user = JSON.parse(inMemoryJWTManager.getToken()).user;
     }
     console.log(user);
