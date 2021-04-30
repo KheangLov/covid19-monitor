@@ -193,7 +193,6 @@ class Main extends Component {
                           </Typography>
                           <Typography 
                             style={{ color }}
-                            variant="body2" 
                             align="center"
                             variant="h3"
                             gutterBottom
