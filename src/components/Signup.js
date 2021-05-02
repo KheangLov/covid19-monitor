@@ -212,7 +212,7 @@ class Signup extends Component {
         }
       });
     }
-  }
+  };
 
   handleRegister = () => {
     axios.post(`${this.state.expressAPIUrl}/v1/auth/register`, this.state.formData)
@@ -308,7 +308,7 @@ class Signup extends Component {
                             name="name"
                             onChange={this.handleChange}
                           />
-                          <FormHelperText error={!noNameError} id="outlined-password-helper-text">
+                          <FormHelperText error={!noNameError} id="outlined-name-helper-text">
                             {!noNameError && errorMessage.name}
                           </FormHelperText>
                         </FormControl>
@@ -323,7 +323,7 @@ class Signup extends Component {
                             labelWidth={42}
                             onChange={this.handleChange}
                           />
-                          <FormHelperText error={!noEmailError} id="outlined-password-helper-text">
+                          <FormHelperText error={!noEmailError} id="outlined-email-helper-text">
                             {!noEmailError && errorMessage.email}
                           </FormHelperText>
                         </FormControl>

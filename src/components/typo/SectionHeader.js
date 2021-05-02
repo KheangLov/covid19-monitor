@@ -5,7 +5,7 @@ import { withRouter } from 'react-router-dom';
 
 const styles = theme => ({
   sectionContainer: {
-    marginTop: theme.spacing(4),
+    marginTop: 0,
     marginBottom: theme.spacing(4)
   },
   title: {

@@ -1,6 +1,6 @@
 import inMemoryJWTManager from '../inMemoryJwt';
 
-const Menu = [
+let Menu = [
   {
     label: "Data",
     pathname: "/"
@@ -10,6 +10,10 @@ const Menu = [
   //   pathname: "/dashboard"
   // },
   {
+    label: "Data List",
+    pathname: "/data-list"
+  },
+  {
     label: inMemoryJWTManager.getToken() ? "Logged" : "Login & Register",
     pathname: "/auth"
   },
@@ -18,15 +22,14 @@ const Menu = [
   //   pathname: "/wizard"
   // },
   // {
-  //   label: "Cards",
-  //   pathname: "/cards"
-  // },
-  // {
   //   label: "Github",
   //   pathname: "https://github.com/alexanmtz/material-sense",
   //   external: true
   // }
 
 ];
+
+if (!inMemoryJWTManager.getToken())
+  Menu = Menu.filter(item => item.pathname !== '/data-list');
 
 export default Menu;

@@ -92,11 +92,57 @@ const styles = theme => ({
 class Main extends Component {
   state = {
     covidData: [],
+    expressAPIUrl: process.env.REACT_APP_EXPRESS_API_URL ? process.env.REACT_APP_EXPRESS_API_URL : 'http://localhost:3000',
     covidAPIDomin: 'https://covid19.mathdro.id',
   };
 
   componentDidMount() {
-    axios.get(`${this.state.covidAPIDomin}/api/countries/KH`)
+    const { covidAPIDomin, expressAPIUrl } = this.state;
+    axios.get(`${expressAPIUrl}/v1/cases`)
+      .then(({ data }) => {
+        const sumOfCase = _.sumBy(data, o => o.numberOfCase);
+        const sumOfDeath = _.sumBy(data, o => o.numberOfDeath);
+        const sumOfRecovered = _.sumBy(data, o => o.numberOfRecovered);
+        const todayCase = data.filter(o => this.getCurrentDate(new Date(o.date).toString()) === this.getCurrentDate())[0];
+
+        const khInternalData = {
+          order: 0,
+          text: "In Cambodia, internal data API",
+          data: [
+            {
+              text: 'Confirmed cases',
+              value: sumOfCase,
+              color: '#ff9800',
+            },
+            {
+              text: 'Death cases',
+              value: sumOfDeath,
+              color: 'rgb(236, 49, 75)',        
+            },
+            {
+              text: 'Recovered cases',
+              value: sumOfRecovered,
+              color: 'rgb(5, 181, 132)',
+              percent: (sumOfRecovered * 100) / sumOfCase
+            },
+          ]
+        };
+
+        if (todayCase && todayCase.numberOfCase) {
+          khInternalData.data[0].today = todayCase.numberOfCase;
+        }
+        if (todayCase && todayCase.numberOfDeath) {
+          khInternalData.data[1].today = todayCase.numberOfDeath;
+        }
+        if (todayCase && todayCase.numberOfRecovered) {
+          khInternalData.data[2].today = todayCase.numberOfRecovered;
+        }
+
+        this.setState({ covidData: [...this.state.covidData, khInternalData] });
+      })
+      .catch(err => { if (err.response && err.response.data) this.handleError(err.response.data); });
+
+    axios.get(`${covidAPIDomin}/api/countries/KH`)
       .then(({ data }) => {
         const khData = {
           order: 1,
@@ -110,12 +156,13 @@ class Main extends Component {
             {
               text: 'Death cases',
               value: data.deaths.value,
-              color: 'rgb(236, 49, 75)',
+              color: 'rgb(236, 49, 75)',              
             },
             {
               text: 'Recovered cases',
               value: data.recovered.value,
               color: 'rgb(5, 181, 132)',
+              percent: (data.recovered.value * 100) / data.confirmed.value
             },
           ]
         };
@@ -143,6 +190,7 @@ class Main extends Component {
               text: 'Recovered cases',
               value: data.recovered.value,
               color: 'rgb(5, 181, 132)',
+              percent: (data.recovered.value * 100) / data.confirmed.value
             },
           ]
         };
@@ -150,6 +198,17 @@ class Main extends Component {
       })
       .catch(err => console.log(err));
   }
+
+  getCurrentDate = (date = '') => {
+    const currentDate = date ? new Date(date) : new Date();
+    let month = '' + (currentDate.getMonth() + 1);
+    let day = '' + currentDate.getDate();
+
+    if (month.length < 2) month = '0' + month;
+    if (day.length < 2) day = '0' + day;
+
+    return `${currentDate.getFullYear()}-${month}-${day}`;
+  };
 
   numberFormat = val => {
     return new Intl.NumberFormat().format(val);
@@ -181,7 +240,7 @@ class Main extends Component {
                   container
                   className={classes.grid}
                 >
-                  {data && data.length ? data.map(({ text: sub_text, value, color }, index) => (
+                  {data && data.length ? data.map(({ text: sub_text, value, color, percent, today }, index) => (
                     <Grid item xs={12} md={4} key={index}>
                       <Paper className={classes.paper}>
                         <div className={classes.box}>
@@ -199,6 +258,16 @@ class Main extends Component {
                             gutterBottom
                           >
                             {this.numberFormat(value)}
+                          </Typography>
+                          <Typography 
+                            style={{ color }}
+                            align="center"
+                            variant="body2"
+                            gutterBottom
+                          >
+                            {today ? `+${this.numberFormat(today)}` : ''}
+                            {today && percent ? ', ' : ''}
+                            {percent ? `(${percent.toFixed(2)}%)` : ''}
                           </Typography>
                         </div>
                       </Paper>
