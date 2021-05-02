@@ -75,7 +75,7 @@ const styles = theme => ({
     paddingTop: 20,
     paddingBottom: 20,
     minWidth: "auto"
-  }
+  },
 });
 
 class Topbar extends Component {
@@ -117,9 +117,9 @@ class Topbar extends Component {
 
     return (
       <AppBar position="absolute" color="default" className={classes.appBar}>
-        <Toolbar>
-          <Grid container spacing={10} alignItems="baseline">
-            <Grid item xs={12} className={classes.flex}>
+        <Toolbar style={{ width: "100%" }}>
+          <Grid container spacing={10} alignItems="center" style={{ width: "100%", margin: "-40px 0" }}>
+            <Grid item xs={12} className={classes.flex} style={{ padding: "40px 0" }}>
               <div className={classes.inline}>
                 <Typography variant="h6" color="inherit" noWrap>
                   <Link to="/" className={classes.link}>

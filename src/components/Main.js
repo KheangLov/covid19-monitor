@@ -259,9 +259,10 @@ class Main extends Component {
           {covidData && covidData.length ? _.orderBy(covidData, ['order'], ['asc']).map(({ text, data }, i) => (
             <React.Fragment key={i}>
               <Typography 
-                style={{ marginTop: "3.5rem" }}
+                style={{ marginTop: "3.5rem", lineHeight: "1.7" }}
                 variant="h4"
                 align="center"
+                color="textPrimary"
               >
                 {text}
               </Typography>
