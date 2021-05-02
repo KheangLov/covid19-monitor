@@ -124,14 +124,14 @@ class Topbar extends Component {
                 <Typography variant="h6" color="inherit" noWrap>
                   <Link to="/" className={classes.link}>
                     <img width={20} src={logo} alt="" />
-                    <span className={classes.tagline}>COVID 19 - Monitor</span>
+                    <span className={classes.tagline}>កូវីដ19 - ទិន្នន័យ</span>
                   </Link>
                 </Typography>
               </div>
               {!this.props.noTabs && (
                 <React.Fragment>
                   <div className={classes.productLogo}>
-                    <Typography>Base on Countries</Typography>
+                    <Typography>ក្នុងស្រុក</Typography>
                   </div>
                   <div className={classes.iconContainer}>
                     <IconButton

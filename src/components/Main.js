@@ -98,6 +98,9 @@ class Main extends Component {
 
   componentDidMount() {
     const { covidAPIDomin, expressAPIUrl } = this.state;
+    const months = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
+    const days = ["អាទិត្យ", "ច័ន្ទ", "អង្គារ៍", "ពុធ", "ព្រហសត្បិ៍", "សុក្រ", "សៅរ៍"];
+
     axios.get(`${expressAPIUrl}/v1/cases`)
       .then(({ data }) => {
         const sumOfCase = _.sumBy(data, o => o.numberOfCase);
@@ -107,18 +110,18 @@ class Main extends Component {
 
         const todayData = {
           order: 1,
-          text: "In Cambodia, data of, ",
+          text: "ករណីឆ្លងសរុបប្រចាំថ្ងៃ, សំរាប់ ",
           data: [
             {
-              text: 'Confirmed cases',
+              text: 'ករណីឆ្លង',
               color: '#ff9800',
             },
             {
-              text: 'Death cases',
+              text: 'ករណីស្លាប់',
               color: 'rgb(236, 49, 75)',        
             },
             {
-              text: 'Recovered cases',
+              text: 'ករណីជា',
               color: 'rgb(5, 181, 132)',
             },
           ]
@@ -126,20 +129,20 @@ class Main extends Component {
 
         const khInternalData = {
           order: 2,
-          text: "In Cambodia, internal data API",
+          text: "ករណីឆ្លងសរុប, ទិន្នន័យក្នុងប្រព័ន្ធ",
           data: [
             {
-              text: 'Confirmed cases',
+              text: 'ករណីឆ្លង',
               value: sumOfCase,
               color: '#ff9800',
             },
             {
-              text: 'Death cases',
+              text: 'ករណីស្លាប់',
               value: sumOfDeath,
               color: 'rgb(236, 49, 75)',        
             },
             {
-              text: 'Recovered cases',
+              text: 'ករណីជា',
               value: sumOfRecovered,
               color: 'rgb(5, 181, 132)',
               percent: (sumOfRecovered * 100) / sumOfCase
@@ -148,8 +151,10 @@ class Main extends Component {
         };
 
         if (date) {
-          const dateData = new Date(date).toDateString();
-          todayData.text += this.getCurrentDate(date) === this.getCurrentDate() ? `${dateData}, Today` : dateData;
+          const dateData = new Date(date);
+          const dateString = `ថ្ងៃ${days[dateData.getDay()]} ទី${dateData.getDate()} ខែ${months[dateData.getMonth()]} ឆ្នាំ${dateData.getFullYear()}`;
+          
+          todayData.text += this.getCurrentDate(date) === this.getCurrentDate() ? `${dateString}, ថ្ងៃនេះ` : `${dateString}, ម្សិលមិញ`;
         }
 
         if (numberOfCase) {
@@ -174,20 +179,20 @@ class Main extends Component {
       .then(({ data }) => {
         const khData = {
           order: 3,
-          text: "In Cambodia, Data from Muhammad Mustadi's API",
+          text: "ករណីឆ្លងសរុប, ទិន្នន័យក្រៅប្រព័ន្ធ",
           data: [
             {
-              text: 'Confirmed cases',
+              text: 'ករណីឆ្លង',
               value: data.confirmed.value,
               color: '#ff9800',
             },
             {
-              text: 'Death cases',
+              text: 'ករណីស្លាប់',
               value: data.deaths.value,
               color: 'rgb(236, 49, 75)',              
             },
             {
-              text: 'Recovered cases',
+              text: 'ករណីជា',
               value: data.recovered.value,
               color: 'rgb(5, 181, 132)',
               percent: (data.recovered.value * 100) / data.confirmed.value
@@ -202,20 +207,20 @@ class Main extends Component {
       .then(({ data }) => {
         const allData = {
           order: 4,
-          text: 'Overall countries',
+          text: 'ករណីឆ្លងទូទាំងសកលលោក',
           data: [
             {
-              text: 'Confirmed cases',
+              text: 'ករណីឆ្លង',
               value: data.confirmed.value,
               color: '#ff9800',
             },
             {
-              text: 'Death cases',
+              text: 'ករណីស្លាប់',
               value: data.deaths.value,
               color: 'rgb(236, 49, 75)',
             },
             {
-              text: 'Recovered cases',
+              text: 'ករណីជា',
               value: data.recovered.value,
               color: 'rgb(5, 181, 132)',
               percent: (data.recovered.value * 100) / data.confirmed.value

@@ -114,7 +114,7 @@ const styles = theme => ({
 });
 
 const getSteps = () => {
-  return ["Register", "Login", "Success"];
+  return ["ស្នើរសំុ", "ចូលប្រព័ន្ធ", "ជោគជ័យ"];
 };
 
 class Signup extends Component {
@@ -240,12 +240,12 @@ class Signup extends Component {
 
   stepActions() {
     if (this.state.activeStep === 0) {
-      return "Go to Login";
+      return "បន្តទៅចូលប្រព័ន្ធ";
     }
     if (this.state.activeStep === 1) {
-      return "Login";
+      return "ចូលប្រព័ន្ធ";
     }
-    return "Go to Data";
+    return "បន្តទៅទិន្នន័យ";
   }
 
   render() {
@@ -299,7 +299,7 @@ class Signup extends Component {
                     <div className={classes.smallContainer}>
                       <Paper className={classes.paper}>
                         <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
-                          <InputLabel error={!noNameError} htmlFor="outlined-adornment-name">Name</InputLabel>
+                          <InputLabel error={!noNameError} htmlFor="outlined-adornment-name">ឈ្មោះ</InputLabel>
                           <OutlinedInput
                             error={!noNameError}
                             id="outlined-adornment-name"
@@ -313,14 +313,14 @@ class Signup extends Component {
                           </FormHelperText>
                         </FormControl>
                         <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
-                          <InputLabel error={!noEmailError} htmlFor="outlined-adornment-email">Email</InputLabel>
+                          <InputLabel error={!noEmailError} htmlFor="outlined-adornment-email">អុីមែល</InputLabel>
                           <OutlinedInput
                             error={!noEmailError}
                             id="outlined-adornment-email"
                             type="email"
                             name="email"
                             aria-describedby="outlined-email-helper-text"
-                            labelWidth={42}
+                            labelWidth={50}
                             onChange={this.handleChange}
                           />
                           <FormHelperText error={!noEmailError} id="outlined-email-helper-text">
@@ -328,7 +328,7 @@ class Signup extends Component {
                           </FormHelperText>
                         </FormControl>
                         <FormControl fullWidth variant="outlined">
-                          <InputLabel error={!noPasswordError} htmlFor="outlined-adornment-password">Password</InputLabel>
+                          <InputLabel error={!noPasswordError} htmlFor="outlined-adornment-password">លេខសំងាត់</InputLabel>
                           <OutlinedInput
                             error={!noPasswordError}
                             id="outlined-adornment-password"
@@ -347,7 +347,7 @@ class Signup extends Component {
                                 </IconButton>
                               </InputAdornment>
                             }
-                            labelWidth={70}
+                            labelWidth={90}
                           />
                           <FormHelperText error={!noPasswordError} id="outlined-password-helper-text">
                             {!noPasswordError && errorMessage.password}
@@ -360,14 +360,14 @@ class Signup extends Component {
                     <div className={classes.smallContainer}>
                       <Paper className={classes.paper}>
                         <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
-                          <InputLabel error={!noEmailError} htmlFor="outlined-adornment-email">Email</InputLabel>
+                          <InputLabel error={!noEmailError} htmlFor="outlined-adornment-email">អុីមែល</InputLabel>
                           <OutlinedInput
                             error={!noEmailError}
                             id="outlined-adornment-email"
                             type="email"
                             name="email"
                             aria-describedby="outlined-email-helper-text"
-                            labelWidth={42}
+                            labelWidth={50}
                             onChange={this.handleChange}
                           />
                           <FormHelperText error={!noEmailError} id="outlined-password-helper-text">
@@ -375,7 +375,7 @@ class Signup extends Component {
                           </FormHelperText>
                         </FormControl>
                         <FormControl fullWidth variant="outlined">
-                          <InputLabel error={!noPasswordError} htmlFor="outlined-adornment-password">Password</InputLabel>
+                          <InputLabel error={!noPasswordError} htmlFor="outlined-adornment-password">លេខសំងាត់</InputLabel>
                           <OutlinedInput
                             error={!noPasswordError}
                             id="outlined-adornment-password"
@@ -394,7 +394,7 @@ class Signup extends Component {
                                 </IconButton>
                               </InputAdornment>
                             }
-                            labelWidth={70}
+                            labelWidth={90}
                           />
                           <FormHelperText error={!noPasswordError} id="outlined-password-helper-text">
                             {!noPasswordError && errorMessage.password}
@@ -409,15 +409,15 @@ class Signup extends Component {
                         <div>
                           <div style={{ marginBottom: 32 }}>
                             <Typography variant="subtitle1" gutterBottom style={{ color: "rgb(5, 181, 132)" }}>
-                              Login Success
+                              ចូលប្រព័ន្ធបានជោគជ័យ
                             </Typography>
                             <Typography variant="body1" gutterBottom>
-                              Here are some user's info.
+                              ទិន្នន័យខ្លះៗរបស់អ្នកកំពុងប្រើ
                             </Typography>
                           </div>
                           <div>
                             <Typography color="secondary" gutterBottom>
-                              User
+                              អ្នកប្រើ
                             </Typography>
                             {user ? (
                               <List component="nav">                                
@@ -463,10 +463,10 @@ class Signup extends Component {
                                 style={{ fontWeight: "bold" }}
                                 gutterBottom
                               >
-                                Collecting your data
+                                ប្រមូលទិន្នន័យ
                               </Typography>
                               <Typography variant="body1" gutterBottom>
-                                We are processing your request
+                                កំពុងពិនិត្យការស្នើរសំុនិងទាញទិន្នន័យ
                               </Typography>
                             </div>
                             <div>
@@ -500,7 +500,7 @@ class Signup extends Component {
                           className={classes.backButton}
                           size="large"
                         >
-                          Back
+                          ថយ
                         </Button>
                       ) : (
                         <Button
@@ -509,7 +509,7 @@ class Signup extends Component {
                           className={classes.backButton}
                           size="large"
                         >
-                          Logout
+                          ចេញពីប្រព័ន្ធ
                         </Button>
                       )}
                       {activeStep === 0 ? (
@@ -524,13 +524,13 @@ class Signup extends Component {
                               : { marginRight: "10px" }
                           }
                         >
-                          Register
+                          ស្នើរសំុ
                         </Button>
                       ) : ''}
                       <Button
                         variant="contained"
                         color="primary"
-                        onClick={this.stepActions() === "Login" ? this.handleLogin : this.handleNext}
+                        onClick={this.stepActions() === "ចូលប្រព័ន្ធ" ? this.handleLogin : this.handleNext}
                         size="large"
                         style={
                           this.state.receivingAccount.length
