@@ -5,8 +5,11 @@ import CssBaseline from "@material-ui/core/CssBaseline";
 import Paper from "@material-ui/core/Paper";
 import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
+import Fade from "@material-ui/core/Fade";
+import CircularProgress from "@material-ui/core/CircularProgress";
 import axios from 'axios';
 import _ from 'lodash';
+import inMemoryJWTManager from '../inMemoryJwt';
 
 import Topbar from "./Topbar";
 
@@ -94,23 +97,38 @@ class Main extends Component {
     covidData: [],
     expressAPIUrl: process.env.REACT_APP_EXPRESS_API_URL ? process.env.REACT_APP_EXPRESS_API_URL : 'http://localhost:3000',
     covidAPIDomin: 'https://covid19.mathdro.id',
+    loading: true,
   };
 
-  componentDidMount() {
-    const { covidAPIDomin, expressAPIUrl } = this.state;
+  async componentDidMount() {
+    if (inMemoryJWTManager.getCaseData()) {
+      const { todayData, khInternalData } = JSON.parse(inMemoryJWTManager.getCaseData());
+      this.setState({ covidData: [...this.state.covidData, todayData, khInternalData], loading: false });
+    }
+    const { covidAPIDomin, expressAPIUrl, covidData } = this.state;
     const months = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
     const days = ["អាទិត្យ", "ច័ន្ទ", "អង្គារ៍", "ពុធ", "ព្រហសត្បិ៍", "សុក្រ", "សៅរ៍"];
 
-    axios.get(`${expressAPIUrl}/v1/cases`)
+    await axios.get(`${expressAPIUrl}/v1/cases`)
       .then(({ data }) => {
         const sumOfCase = _.sumBy(data, o => o.numberOfCase);
         const sumOfDeath = _.sumBy(data, o => o.numberOfDeath);
         const sumOfRecovered = _.sumBy(data, o => o.numberOfRecovered);
         const { numberOfCase, numberOfDeath, numberOfRecovered, date } = _.orderBy(data, ['date'], ['asc'])[data.length - 1];
+        let dateFormatKh = '';
+        if (date) {
+          const dateData = new Date(date);
+          const dateString = `ថ្ងៃ${days[dateData.getDay()]} ទី${dateData.getDate()} ខែ${months[dateData.getMonth()]} ឆ្នាំ${dateData.getFullYear()}`;
+          
+          dateFormatKh += this.getCurrentDate(date) === this.getCurrentDate() ? `${dateString}, ថ្ងៃនេះ` : `${dateString}, ម្សិលមិញ`;
+        }
+
+        const arrayExclude = [`ករណីឆ្លងសរុបប្រចាំថ្ងៃ, សំរាប់ ${dateFormatKh}`, "ករណីឆ្លងសរុប, ទិន្នន័យក្នុងប្រព័ន្ធ"];
+        const covidDataFilter = covidData.filter(item => !arrayExclude.includes(item.text));
 
         const todayData = {
           order: 1,
-          text: "ករណីឆ្លងសរុបប្រចាំថ្ងៃ, សំរាប់ ",
+          text: `ករណីឆ្លងសរុបប្រចាំថ្ងៃ, សំរាប់ ${dateFormatKh}`,
           data: [
             {
               text: 'ករណីឆ្លង',
@@ -150,13 +168,6 @@ class Main extends Component {
           ]
         };
 
-        if (date) {
-          const dateData = new Date(date);
-          const dateString = `ថ្ងៃ${days[dateData.getDay()]} ទី${dateData.getDate()} ខែ${months[dateData.getMonth()]} ឆ្នាំ${dateData.getFullYear()}`;
-          
-          todayData.text += this.getCurrentDate(date) === this.getCurrentDate() ? `${dateString}, ថ្ងៃនេះ` : `${dateString}, ម្សិលមិញ`;
-        }
-
         if (numberOfCase) {
           khInternalData.data[0].today = numberOfCase;
           todayData.data[0].value = numberOfCase;
@@ -170,12 +181,12 @@ class Main extends Component {
           todayData.data[2].value = numberOfRecovered;
           todayData.data[2].percent = (numberOfRecovered * 100) / numberOfCase;
         }
-
-        this.setState({ covidData: [...this.state.covidData, todayData, khInternalData] });
+        inMemoryJWTManager.setCaseData({todayData, khInternalData});
+        this.setState({ covidData: [...covidDataFilter, todayData, khInternalData], loading: false });
       })
       .catch(err => { if (err.response && err.response.data) this.handleError(err.response.data); });
 
-    axios.get(`${covidAPIDomin}/api/countries/KH`)
+    await axios.get(`${covidAPIDomin}/api/countries/KH`)
       .then(({ data }) => {
         const khData = {
           order: 3,
@@ -203,7 +214,7 @@ class Main extends Component {
       })
       .catch(err => console.log(err));
 
-    axios.get(`${this.state.covidAPIDomin}/api`)
+    await axios.get(`${this.state.covidAPIDomin}/api`)
       .then(({ data }) => {
         const allData = {
           order: 4,
@@ -232,6 +243,29 @@ class Main extends Component {
       .catch(err => console.log(err));
   }
 
+  handleError = data => {
+    if (data && data.errors && data.errors.length) {
+      data.errors.forEach(({ field, messages }) => {
+        let obj = {};
+        obj[field] = messages.length ? messages.join(', ') : '';
+        this.setState({
+          errorMessage: {
+            ...this.state.errorMessage,
+            ...obj
+          }
+        });
+      });
+    } else if (data && data.message) {
+      const { message } = data;
+      this.setState({
+        errorMessage: {
+          email: message,
+          password: message,
+        }
+      });
+    }
+  };
+
   getCurrentDate = (date = '') => {
     const currentDate = date ? new Date(date) : new Date();
     let month = '' + (currentDate.getMonth() + 1);
@@ -249,13 +283,28 @@ class Main extends Component {
 
   render() {
     const { classes } = this.props;
-    const { covidData } = this.state;
+    const { covidData, loading } = this.state;
 
     return (
       <React.Fragment>
         <CssBaseline />
         <Topbar />
-        <div className={classes.root}>
+        <div className={classes.root} style={{ textAlign: "center" }}>
+          <Fade
+            in={loading}
+            style={{
+              transitionDelay: loading ? "800ms" : "0ms",              
+            }}
+            unmountOnExit
+          >
+            <CircularProgress
+              style={{                
+                marginTop: 50,
+                width: 40,
+                height: 40
+              }}
+            />
+          </Fade>
           {covidData && covidData.length ? _.orderBy(covidData, ['order'], ['asc']).map(({ text, data }, i) => (
             <React.Fragment key={i}>
               <Typography 
