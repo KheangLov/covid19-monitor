@@ -103,10 +103,29 @@ class Main extends Component {
         const sumOfCase = _.sumBy(data, o => o.numberOfCase);
         const sumOfDeath = _.sumBy(data, o => o.numberOfDeath);
         const sumOfRecovered = _.sumBy(data, o => o.numberOfRecovered);
-        const todayCase = data.filter(o => this.getCurrentDate(new Date(o.date).toString()) === this.getCurrentDate())[0];
+        const { numberOfCase, numberOfDeath, numberOfRecovered, date } = _.orderBy(data, ['date'], ['asc'])[data.length - 1];
+
+        const todayData = {
+          order: 1,
+          text: "In Cambodia, data of, ",
+          data: [
+            {
+              text: 'Confirmed cases',
+              color: '#ff9800',
+            },
+            {
+              text: 'Death cases',
+              color: 'rgb(236, 49, 75)',        
+            },
+            {
+              text: 'Recovered cases',
+              color: 'rgb(5, 181, 132)',
+            },
+          ]
+        };
 
         const khInternalData = {
-          order: 0,
+          order: 2,
           text: "In Cambodia, internal data API",
           data: [
             {
@@ -128,24 +147,33 @@ class Main extends Component {
           ]
         };
 
-        if (todayCase && todayCase.numberOfCase) {
-          khInternalData.data[0].today = todayCase.numberOfCase;
-        }
-        if (todayCase && todayCase.numberOfDeath) {
-          khInternalData.data[1].today = todayCase.numberOfDeath;
-        }
-        if (todayCase && todayCase.numberOfRecovered) {
-          khInternalData.data[2].today = todayCase.numberOfRecovered;
+        if (date) {
+          const dateData = new Date(date).toDateString();
+          todayData.text += this.getCurrentDate(date) === this.getCurrentDate() ? `${dateData}, Today` : dateData;
         }
 
-        this.setState({ covidData: [...this.state.covidData, khInternalData] });
+        if (numberOfCase) {
+          khInternalData.data[0].today = numberOfCase;
+          todayData.data[0].value = numberOfCase;
+        }
+        if (numberOfDeath) {
+          khInternalData.data[1].today = numberOfDeath;
+          todayData.data[1].value = numberOfDeath;
+        }
+        if (numberOfRecovered) {
+          khInternalData.data[2].today = numberOfRecovered;
+          todayData.data[2].value = numberOfRecovered;
+          todayData.data[2].percent = (numberOfRecovered * 100) / numberOfCase;
+        }
+
+        this.setState({ covidData: [...this.state.covidData, todayData, khInternalData] });
       })
       .catch(err => { if (err.response && err.response.data) this.handleError(err.response.data); });
 
     axios.get(`${covidAPIDomin}/api/countries/KH`)
       .then(({ data }) => {
         const khData = {
-          order: 1,
+          order: 3,
           text: "In Cambodia, Data from Muhammad Mustadi's API",
           data: [
             {
@@ -173,7 +201,7 @@ class Main extends Component {
     axios.get(`${this.state.covidAPIDomin}/api`)
       .then(({ data }) => {
         const allData = {
-          order: 2,
+          order: 4,
           text: 'Overall countries',
           data: [
             {
