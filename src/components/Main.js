@@ -120,7 +120,7 @@ class Main extends Component {
           const dateData = new Date(date);
           const dateString = `ថ្ងៃ${days[dateData.getDay()]} ទី${dateData.getDate()} ខែ${months[dateData.getMonth()]} ឆ្នាំ${dateData.getFullYear()}`;
           
-          dateFormatKh += this.getCurrentDate(date) === this.getCurrentDate() ? `${dateString}, ថ្ងៃនេះ` : `${dateString}, ម្សិលមិញ`;
+          dateFormatKh += this.getCurrentDate(date) === this.getCurrentDate() ? `${dateString}, ថ្ងៃនេះ` : dateString;
         }
 
         const arrayExclude = [`ករណីឆ្លងសរុបប្រចាំថ្ងៃ, សំរាប់ ${dateFormatKh}`, "ករណីឆ្លងសរុប, ទិន្នន័យក្នុងប្រព័ន្ធ"];
@@ -340,7 +340,7 @@ class Main extends Component {
                             variant="h3"
                             gutterBottom
                           >
-                            {this.numberFormat(value)}
+                            {value ? this.numberFormat(value) : '0'}
                           </Typography>
                           <Typography 
                             style={{ color }}
