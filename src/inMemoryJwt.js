@@ -3,6 +3,7 @@ import Cookie from "js-cookie";
 const inMemoryJWTManager = () => {
     const getToken = () => Cookie.get("token") ? Cookie.get("token") : null;
     const getCaseData = () => Cookie.get("internal_cases") ? Cookie.get("internal_cases") : null;
+    const getLang = () => Cookie.get("lang_locale") ? Cookie.get("lang_locale") : null;
 
     const setToken = token => {
         Cookie.set("token", token);
@@ -11,6 +12,11 @@ const inMemoryJWTManager = () => {
 
     const setCaseData = data => {
         Cookie.set("internal_cases", data);
+        return true;
+    };
+
+    const setLang = data => {
+        Cookie.set("lang_locale", data);
         return true;
     };
 
@@ -30,7 +36,9 @@ const inMemoryJWTManager = () => {
         setToken,
         getCaseData,
         ereaseCaseData,
-        setCaseData
+        setCaseData,
+        getLang,
+        setLang,
     }
 };
 

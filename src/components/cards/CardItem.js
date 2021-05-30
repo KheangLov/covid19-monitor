@@ -16,6 +16,9 @@ import Dialog from '@material-ui/core/Dialog';
 import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
+import Fade from "@material-ui/core/Fade";
+import CircularProgress from "@material-ui/core/CircularProgress";
+import Pagination from '@material-ui/lab/Pagination';
 import axios from 'axios';
 import _ from 'lodash';
 import inMemoryJWTManager from '../../inMemoryJwt';
@@ -81,12 +84,18 @@ const styles = theme => ({
   },
   backButton: {
     marginRight: theme.spacing(2)
-  }
+  },
+  marginBottom: {
+    marginBottom: theme.spacing(1),
+  },
+  paginateAlign: {
+    justifyContent: 'flex-end'
+  },
 })
 
 class CardItem extends Component {
   state = {
-    expressAPIUrl: process.env.REACT_APP_EXPRESS_API_URL ? process.env.REACT_APP_EXPRESS_API_URL : 'http://localhost:3000',
+    expressAPIUrl: process.env.REACT_APP_EXPRESS_API_URL ? process.env.REACT_APP_EXPRESS_API_URL : 'http://localhost:4000',
     errorMessage: {},
     formData: {
       location: 'Cambodia',
@@ -97,6 +106,12 @@ class CardItem extends Component {
     requestConfig: {},
     dataList: [],
     dialogOpen: {},
+    loading: true,
+    isLoading: true,
+    perPage: 10,
+    page: 1,
+    totalEntries: 0,
+    totalPages: 0,
   };
 
   componentDidMount() {
@@ -164,12 +179,18 @@ class CardItem extends Component {
     for (let key in formData)
       if (inputs.includes(key)) 
         document.querySelector(`input[name="${key}"]`).value = '';
-  }
+  };
 
   handleList = () => {
-    const { expressAPIUrl, requestConfig } = this.state;
-    axios.get(`${expressAPIUrl}/v1/cases`, requestConfig)
-      .then(({ data }) => this.setState({ dataList: data }))
+    const { expressAPIUrl, requestConfig, perPage, page } = this.state;
+    axios.get(`${expressAPIUrl}/v1/cases`, 
+      { params: { page, perPage } }, 
+      requestConfig
+    )
+      .then(({ data: { data, totalEntries, totalPages } }) => {
+        this.setState({ dataList: data, totalEntries, totalPages, isLoading: false });
+        this.props.getFromChild({ totalEntries, perPage});
+      })
       .catch(err => { if (err.response && err.response.data) this.handleError(err.response.data); });
   };
  
@@ -239,7 +260,7 @@ class CardItem extends Component {
 
   render() {
     const { classes, type } = this.props;
-    const { errorMessage, createdStatus, updatedStatus, buttonDisabled, dataList, edit, formData, dialogOpen } = this.state;
+    const { errorMessage, createdStatus, updatedStatus, buttonDisabled, dataList, edit, formData, dialogOpen, loading, page, totalPages, isLoading } = this.state;
     const currentDate = this.getCurrentDate();
     const noNumOfCasesError = !errorMessage.numberOfCase;
     const noNumOfDeathError = !errorMessage.numberOfDeath;
@@ -247,6 +268,24 @@ class CardItem extends Component {
     
     return (
       <div className={classes.root}>
+        {(!type || type !== 'form') && isLoading ? (
+          <div style={{ textAlign: "center" }}>
+            <Fade
+              in={loading}
+              style={{
+                transitionDelay: loading ? "100ms" : "0ms",              
+              }}
+            >
+              <CircularProgress
+                style={{
+                  marginBottom: 30,
+                  width: 40,
+                  height: 40
+                }}
+              />
+            </Fade>
+          </div>
+        ) : ''}
         {!type || type !== 'form' ? dataList.map(({ _id, numberOfCase, numberOfRecovered, numberOfDeath, date }) => (
           <Paper className={classes.paper} style={{ marginBottom: "20px" }} key={_id}>
             <div className={classes.itemContainer} key={_id}>
@@ -361,7 +400,7 @@ class CardItem extends Component {
             <div className={classes.itemContainer}>
               <Grid container>
                 <Grid item xs={12}>
-                  <Typography style={{ marginBottom: '2rem' }} color='secondary' gutterBottom>
+                  <Typography style={{ marginBottom: '1rem' }} color='secondary' gutterBottom>
                     Add cases for -&nbsp;
                     <span style={{ color: 'rgba(0, 0, 0, 0.54)' }}>
                       {edit ? this.getCurrentDate(formData.date) : currentDate}
@@ -433,6 +472,18 @@ class CardItem extends Component {
             </div>
           </Paper>
         )}
+        {!type || type !== 'form' ? (
+          <Pagination 
+            count={totalPages} 
+            page={page} 
+            color="primary" 
+            classes={{ ul: classes.paginateAlign }}
+            onChange={async (e, pg) => {
+              await this.setState({ dataList: [], isLoading: true, page: pg });
+              setTimeout(() => this.handleList(), 500);
+            }}
+          />
+        ) : ''}
       </div>
     )
   }

@@ -7,6 +7,7 @@ import Typography from "@material-ui/core/Typography";
 import Grid from "@material-ui/core/Grid";
 import Fade from "@material-ui/core/Fade";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import Tooltip from '@material-ui/core/Tooltip';
 import axios from 'axios';
 import _ from 'lodash';
 import inMemoryJWTManager from '../inMemoryJwt';
@@ -89,46 +90,52 @@ const styles = theme => ({
     position: "absolute",
     top: "40%",
     left: "40%"
-  }
+  },
 });
 
 class Main extends Component {
   state = {
     covidData: [],
-    expressAPIUrl: process.env.REACT_APP_EXPRESS_API_URL ? process.env.REACT_APP_EXPRESS_API_URL : 'http://localhost:3000',
+    expressAPIUrl: process.env.REACT_APP_EXPRESS_API_URL ? process.env.REACT_APP_EXPRESS_API_URL : 'http://localhost:4000',
     covidAPIDomin: 'https://covid19.mathdro.id',
     loading: true,
+    langLocale: 'kh'
   };
 
   async componentDidMount() {
+    if (!inMemoryJWTManager.getLang()) {
+      inMemoryJWTManager.setLang('kh');
+    } else {
+      await this.setState({ langLocale: inMemoryJWTManager.getLang() });
+    }
+
     if (inMemoryJWTManager.getCaseData()) {
       const { todayData, khInternalData } = JSON.parse(inMemoryJWTManager.getCaseData());
-      this.setState({ covidData: [...this.state.covidData, todayData, khInternalData], loading: false });
-    }
+      if (todayData && khInternalData) {
+        this.setState({ covidData: [...this.state.covidData, todayData, khInternalData] });
+      }
+    }    
+    this.setState({ loading: false });
     const { covidAPIDomin, expressAPIUrl, covidData } = this.state;
-    const months = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
-    const days = ["អាទិត្យ", "ច័ន្ទ", "អង្គារ៍", "ពុធ", "ព្រហសត្បិ៍", "សុក្រ", "សៅរ៍"];
 
     await axios.get(`${expressAPIUrl}/v1/cases`)
-      .then(({ data }) => {
+      .then(({ data: { data } }) => {
         const sumOfCase = _.sumBy(data, o => o.numberOfCase);
         const sumOfDeath = _.sumBy(data, o => o.numberOfDeath);
         const sumOfRecovered = _.sumBy(data, o => o.numberOfRecovered);
         const { numberOfCase, numberOfDeath, numberOfRecovered, date } = _.orderBy(data, ['date'], ['asc'])[data.length - 1];
-        let dateFormatKh = '';
-        if (date) {
-          const dateData = new Date(date);
-          const dateString = `ថ្ងៃ${days[dateData.getDay()]} ទី${dateData.getDate()} ខែ${months[dateData.getMonth()]} ឆ្នាំ${dateData.getFullYear()}`;
-          
-          dateFormatKh += this.getCurrentDate(date) === this.getCurrentDate() ? `${dateString}, ថ្ងៃនេះ` : dateString;
-        }
+        const { 
+          numberOfCase: numberOfCaseYtd, 
+          numberOfDeath: numberOfDeathYtd, 
+          numberOfRecovered: numberOfRecoveredYtd,
+        } = _.orderBy(data, ['date'], ['asc'])[data.length - 2];
 
-        const arrayExclude = [`ករណីឆ្លងសរុបប្រចាំថ្ងៃ, សំរាប់ ${dateFormatKh}`, "ករណីឆ្លងសរុប, ទិន្នន័យក្នុងប្រព័ន្ធ"];
-        const covidDataFilter = covidData.filter(item => !arrayExclude.includes(item.text));
+        const covidDataFilter = covidData.filter(item => ![1, 2].includes(item.order));
 
         const todayData = {
           order: 1,
-          text: `ករណីឆ្លងសរុបប្រចាំថ្ងៃ, សំរាប់ ${dateFormatKh}`,
+          date,
+          text: date ? this.dateStringFormatted(date) : '',
           data: [
             {
               text: 'ករណីឆ្លង',
@@ -151,37 +158,55 @@ class Main extends Component {
           data: [
             {
               text: 'ករណីឆ្លង',
-              value: sumOfCase,
+              value: this.numberTranslate(this.numberFormat(sumOfCase)),
               color: '#ff9800',
             },
             {
               text: 'ករណីស្លាប់',
-              value: sumOfDeath,
+              value: this.numberTranslate(this.numberFormat(sumOfDeath)),
               color: 'rgb(236, 49, 75)',        
             },
             {
               text: 'ករណីជា',
-              value: sumOfRecovered,
+              value: this.numberTranslate(this.numberFormat(sumOfRecovered)),
               color: 'rgb(5, 181, 132)',
-              percent: (sumOfRecovered * 100) / sumOfCase
+              percent: this.numberTranslate(((sumOfRecovered * 100) / sumOfCase).toFixed(2))
             },
           ]
         };
 
+        if (numberOfCaseYtd) {
+          todayData.data[0].ytdForCal = numberOfCaseYtd;
+          todayData.data[0].ytd = this.numberTranslate(this.numberFormat(numberOfCaseYtd));
+          todayData.data[0].updown = this.formatUpdownText(numberOfCase, numberOfCaseYtd);
+        }
+        if (numberOfDeathYtd) {
+          todayData.data[1].ytdForCal = numberOfDeathYtd;
+          todayData.data[1].ytd = this.numberTranslate(this.numberFormat(numberOfDeathYtd));
+          todayData.data[1].updown = this.formatUpdownText(numberOfDeath, numberOfDeathYtd);
+        }
+        if (numberOfRecoveredYtd) {
+          todayData.data[2].ytdForCal = numberOfRecoveredYtd;
+          todayData.data[2].ytd = this.numberTranslate(this.numberFormat(numberOfRecoveredYtd));
+          todayData.data[2].updown = this.formatUpdownText(numberOfRecovered, numberOfRecoveredYtd);
+        }
+
         if (numberOfCase) {
-          khInternalData.data[0].today = numberOfCase;
-          todayData.data[0].value = numberOfCase;
+          khInternalData.data[0].today = this.numberTranslate(this.numberFormat(numberOfCase));
+          todayData.data[0].value = this.numberTranslate(this.numberFormat(numberOfCase));
+          todayData.data[0].valueForCal = numberOfCase;
         }
         if (numberOfDeath) {
-          khInternalData.data[1].today = numberOfDeath;
-          todayData.data[1].value = numberOfDeath;
+          khInternalData.data[1].today = this.numberTranslate(this.numberFormat(numberOfDeath));
+          todayData.data[1].value = this.numberTranslate(this.numberFormat(numberOfDeath));
+          todayData.data[1].valueForCal = numberOfDeath;
         }
         if (numberOfRecovered) {
-          khInternalData.data[2].today = numberOfRecovered;
-          todayData.data[2].value = numberOfRecovered;
-          todayData.data[2].percent = (numberOfRecovered * 100) / numberOfCase;
+          khInternalData.data[2].today = this.numberTranslate(this.numberFormat(numberOfRecovered));
+          todayData.data[2].value = this.numberTranslate(this.numberFormat(numberOfRecovered));
+          todayData.data[2].valueForCal = numberOfRecovered;
         }
-        inMemoryJWTManager.setCaseData({todayData, khInternalData});
+        inMemoryJWTManager.setCaseData({ todayData, khInternalData });
         this.setState({ covidData: [...covidDataFilter, todayData, khInternalData], loading: false });
       })
       .catch(err => { if (err.response && err.response.data) this.handleError(err.response.data); });
@@ -194,19 +219,19 @@ class Main extends Component {
           data: [
             {
               text: 'ករណីឆ្លង',
-              value: data.confirmed.value,
+              value: this.numberTranslate(this.numberFormat(data.confirmed.value)),
               color: '#ff9800',
             },
             {
               text: 'ករណីស្លាប់',
-              value: data.deaths.value,
+              value: this.numberTranslate(this.numberFormat(data.deaths.value)),
               color: 'rgb(236, 49, 75)',              
             },
             {
               text: 'ករណីជា',
-              value: data.recovered.value,
+              value: this.numberTranslate(this.numberFormat(data.recovered.value)),
               color: 'rgb(5, 181, 132)',
-              percent: (data.recovered.value * 100) / data.confirmed.value
+              percent: this.numberTranslate(((data.recovered.value * 100) / data.confirmed.value).toFixed(2))
             },
           ]
         };
@@ -222,19 +247,19 @@ class Main extends Component {
           data: [
             {
               text: 'ករណីឆ្លង',
-              value: data.confirmed.value,
+              value: this.numberTranslate(this.numberFormat(data.confirmed.value)),
               color: '#ff9800',
             },
             {
               text: 'ករណីស្លាប់',
-              value: data.deaths.value,
+              value: this.numberTranslate(this.numberFormat(data.deaths.value)),
               color: 'rgb(236, 49, 75)',
             },
             {
               text: 'ករណីជា',
-              value: data.recovered.value,
+              value: this.numberTranslate(this.numberFormat(data.recovered.value)),
               color: 'rgb(5, 181, 132)',
-              percent: (data.recovered.value * 100) / data.confirmed.value
+              percent: this.numberTranslate(((data.recovered.value * 100) / data.confirmed.value).toFixed(2))
             },
           ]
         };
@@ -242,6 +267,85 @@ class Main extends Component {
       })
       .catch(err => console.log(err));
   }
+
+  dateStringFormatted = date => {
+    const { langLocale } = this.state;
+    const months = ['មករា', 'កុម្ភៈ', 'មីនា', 'មេសា', 'ឧសភា', 'មិថុនា', 'កក្កដា', 'សីហា', 'កញ្ញា', 'តុលា', 'វិច្ឆិកា', 'ធ្នូ'];
+    const days = ["អាទិត្យ", "ច័ន្ទ", "អង្គារ៍", "ពុធ", "ព្រហសត្បិ៍", "សុក្រ", "សៅរ៍"];
+    const dateData = new Date(date);
+    let dateNum = dateData.getDate();
+    let yearNum = dateData.getFullYear();
+    if (langLocale === 'kh') {
+      dateNum = this.numberTranslate(dateNum);
+      yearNum = this.numberTranslate(yearNum);
+    }
+    const dateString = `ថ្ងៃ${days[dateData.getDay()]} ទី${dateNum} ខែ${months[dateData.getMonth()]} ឆ្នាំ${yearNum}`;
+    const returnText = this.getCurrentDate(date) === this.getCurrentDate() ? `${dateString}, ថ្ងៃនេះ` : dateString;
+
+    return `ករណីឆ្លងសរុបប្រចាំថ្ងៃ, សំរាប់ ${returnText}`;
+  };
+
+  handleNumberTranslate = () => {
+    const { covidData } = this.state;
+    const newData = covidData.map(val => {
+      if (val.order === 1) {
+        val.text = this.dateStringFormatted(val.date);
+      }
+      val.data = val.data.map(v => {
+        if (v.value) {
+          v.value = this.numberTranslate(v.value);
+        }
+        if (v.today) {
+          v.today = this.numberTranslate(v.today);
+        }
+        if (v.percent) {
+          v.percent = this.numberTranslate(v.percent);
+        }
+        if (v.ytd) {
+          v.ytd = this.numberTranslate(v.ytd);          
+        }
+        if (v.updown && v.valueForCal && v.ytdForCal) {
+          v.updown = this.formatUpdownText(v.valueForCal, v.ytdForCal);
+        }
+        return v;
+      });
+      return val;
+    });
+    this.setState({ covidData: newData });
+    const cookiedata = newData.filter(item => [1, 2].includes(item.order));
+    inMemoryJWTManager.setCaseData({...cookiedata});
+  };
+
+  numberTranslate = num => {
+    const { langLocale } = this.state;    
+    const khNumbers = ['០', '១', '២', '៣', '៤', '៥', '៦', '៧', '៨', '៩'];
+    const signs = ['.', ','];
+    let newNum = '';
+    if (typeof num !== 'string') num = num.toString();
+    [...num].forEach(n => {
+      if (signs.includes(n)) {
+        newNum += n;
+        return true;
+      }
+      newNum += langLocale === 'kh' ? khNumbers[n] : (langLocale !== 'kh' && khNumbers.indexOf(n) > -1 ? khNumbers.indexOf(n) : n);
+    });
+    return newNum;
+  };
+
+  formatUpdownText = (first, second) => {
+    const { langLocale } = this.state;
+    let updown = first - second;
+    let text = '';
+    let updownCal = Math.abs((updown / first) * 100).toFixed(2);
+    text = updown > 0 ? 'កើន ' : 'ថយ ';
+    updown = this.numberFormat(Math.abs(updown));
+    if (langLocale === 'kh') {
+      updown = this.numberTranslate(updown);
+      updownCal = this.numberTranslate(updownCal);
+    }
+    text += `(${updown} ករណី) ស្មើរនឹង (${updownCal}%)`;
+    return text;
+  };
 
   handleError = data => {
     if (data && data.errors && data.errors.length) {
@@ -290,21 +394,6 @@ class Main extends Component {
         <CssBaseline />
         <Topbar />
         <div className={classes.root} style={{ textAlign: "center" }}>
-          <Fade
-            in={loading}
-            style={{
-              transitionDelay: loading ? "800ms" : "0ms",              
-            }}
-            unmountOnExit
-          >
-            <CircularProgress
-              style={{                
-                marginTop: 50,
-                width: 40,
-                height: 40
-              }}
-            />
-          </Fade>
           {covidData && covidData.length ? _.orderBy(covidData, ['order'], ['asc']).map(({ text, data }, i) => (
             <React.Fragment key={i}>
               <Typography 
@@ -323,34 +412,45 @@ class Main extends Component {
                   container
                   className={classes.grid}
                 >
-                  {data && data.length ? data.map(({ text: sub_text, value, color, percent, today }, index) => (
+                  {data && data.length ? data.map(({ text: sub_text, value, color, percent, today, ytd, updown }, index) => (
                     <Grid item xs={12} md={4} key={index}>
                       <Paper className={classes.paper}>
                         <div className={classes.box}>
                           <Typography
-                            style={{ textTransform: "capitalize" }}
+                            style={{ textTransform: "capitalize", marginBottom: '0.1em' }}
                             gutterBottom
                             align="center"
                           >
                             {sub_text}
                           </Typography>
-                          <Typography 
-                            style={{ color }}
-                            align="center"
-                            variant="h3"
-                            gutterBottom
-                          >
-                            {value ? this.numberFormat(value) : '0'}
-                          </Typography>
+                          <Tooltip title="ចុចលើលេខដើម្បីប្តូរភាសា">
+                            <Typography 
+                              style={{ color, marginBottom: '0.1em' }}
+                              align="center"
+                              variant="h3"
+                              gutterBottom
+                              onClick={async () => {
+                                const langLocale = inMemoryJWTManager.getLang() === 'kh' ? 'en' : 'kh';
+                                await this.setState({ langLocale });
+                                await inMemoryJWTManager.setLang(langLocale);
+                                this.handleNumberTranslate();
+                              }}
+                            >
+                              {value || '0'}
+                            </Typography>
+                          </Tooltip>
                           <Typography 
                             style={{ color }}
                             align="center"
                             variant="body2"
                             gutterBottom
                           >
-                            {today ? `+${this.numberFormat(today)}` : ''}
+                            {today ? `+${today}` : ''}
                             {today && percent ? ', ' : ''}
-                            {percent ? `(${percent.toFixed(2)}%)` : ''}
+                            {percent ? `(${percent}%)` : ''}                            
+                            {updown ? updown : ''}
+                            {ytd && updown ? ', ' : ''}
+                            {ytd ? `ម្សិលមិញ: ${ytd}` : ''}
                           </Typography>
                         </div>
                       </Paper>
@@ -359,7 +459,23 @@ class Main extends Component {
                 </Grid>
               </Grid>
             </React.Fragment>
-          )) : ''}
+          )) : (
+            <Fade
+              in={loading}
+              style={{
+                transitionDelay: loading ? "100ms" : "0ms",              
+              }}
+              unmountOnExit
+            >
+              <CircularProgress
+                style={{                
+                  marginTop: 50,
+                  width: 40,
+                  height: 40
+                }}
+              />
+            </Fade>
+          )}
         </div>
       </React.Fragment>
     );

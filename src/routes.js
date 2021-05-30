@@ -4,6 +4,7 @@ import Main from './components/Main'
 import Signup from './components/Signup'
 import ScrollToTop from './components/ScrollTop'
 import Cards from './components/Cards'
+import PageNotFound from './components/PageNotFound';
 
 export default props => (
     <HashRouter>
@@ -11,7 +12,8 @@ export default props => (
         <Switch>
           <Route exact path='/' component={ Main } />
           <Route exact path='/data-list' component={ Cards } />
-          <Route exact path='/auth' component={ Signup } />          
+          <Route exact path='/auth' component={ Signup } />   
+          <Route exact component={ PageNotFound } />       
         </Switch>
       </ScrollToTop>
     </HashRouter>

@@ -122,7 +122,7 @@ class Topbar extends Component {
             <Grid item xs={12} className={classes.flex} style={{ padding: "40px 0" }}>
               <div className={classes.inline}>
                 <Typography variant="h6" color="inherit" noWrap>
-                  <Link to="/" className={classes.link}>
+                  <Link to="/" className={classes.link} replace>
                     <img width={20} src={logo} alt="" />
                     <span className={classes.tagline}>កូវីដ19 - ទិន្នន័យ</span>
                   </Link>
@@ -164,6 +164,7 @@ class Topbar extends Component {
                                     search: this.props.location.search
                                   }
                             }
+                            replace
                             button
                             key={item.label}
                           >
@@ -191,6 +192,7 @@ class Topbar extends Component {
                                   search: this.props.location.search
                                 }
                           }
+                          replace
                           classes={{ root: classes.tabItem }}
                           label={item.label}
                         />

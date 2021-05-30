@@ -26,6 +26,7 @@ import Visibility from '@material-ui/icons/Visibility';
 import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import IconButton from '@material-ui/core/IconButton';
 import FormHelperText from '@material-ui/core/FormHelperText';
+import Tooltip from '@material-ui/core/Tooltip';
 import axios from 'axios';
 import inMemoryJWTManager from '../inMemoryJwt';
 
@@ -119,8 +120,8 @@ const getSteps = () => {
 
 class Signup extends Component {
   state = {
-    expressAPIUrl: process.env.REACT_APP_EXPRESS_API_URL ? process.env.REACT_APP_EXPRESS_API_URL : 'http://localhost:3000',
-    activeStep: 0,
+    expressAPIUrl: process.env.REACT_APP_EXPRESS_API_URL ? process.env.REACT_APP_EXPRESS_API_URL : 'http://localhost:4000',
+    activeStep: inMemoryJWTManager.getToken() ? 2 : 0,
     receivingAccount: "",
     termsChecked: false,
     loading: true,
@@ -140,18 +141,12 @@ class Signup extends Component {
     errorMessage: {}
   };
 
-  componentDidMount() {
-    if (inMemoryJWTManager.getToken()) {
-      this.setState({ activeStep: 2 });
-    }
-  }
-
   handleNext = () => {
     this.setState(state => ({
       activeStep: state.activeStep + 1
     }));
     if (this.state.activeStep === 2) {
-      setTimeout(() => this.props.history.push("/"), 5000);
+      setTimeout(() => window.location.href = '/', 1500);
     }
   };
 
@@ -230,7 +225,7 @@ class Signup extends Component {
     axios.post(`${this.state.expressAPIUrl}/v1/auth/login`, this.state.formData)
       .then(({ data }) => {        
         inMemoryJWTManager.setToken(data);
-        this.handleNext() 
+        this.handleNext();
       })
       .catch(err => {
         const { response: { data } } = err;
@@ -426,10 +421,13 @@ class Signup extends Component {
                                     <ListItemIcon>
                                       <DoneIcon style={{ color: "rgb(5, 181, 132)" }} />
                                     </ListItemIcon>
-                                    <ListItemText
-                                      inset
-                                      primary={user.email}
-                                    />
+                                    <Tooltip title={user.email}>
+                                      <ListItemText
+                                        style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                        inset
+                                        primary={user.email}
+                                      />
+                                    </Tooltip>
                                   </ListItem>
                                 ) : ''}
                                 {user.name ? (
@@ -437,10 +435,13 @@ class Signup extends Component {
                                     <ListItemIcon>
                                       <DoneIcon style={{ color: "rgb(5, 181, 132)" }} />
                                     </ListItemIcon>
-                                    <ListItemText
-                                      inset
-                                      primary={user.name}
-                                    />
+                                    <Tooltip title={user.name}>
+                                      <ListItemText
+                                        style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                        inset
+                                        primary={user.name}
+                                      />
+                                    </Tooltip>
                                   </ListItem>
                                 ) : ''}                                
                               </List>

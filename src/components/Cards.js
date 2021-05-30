@@ -25,9 +25,18 @@ const styles = theme => ({
 });
 
 class Cards extends Component {
+  state = {
+    totalEntries: 0,
+    perPage: 0,
+  };
+
+  getFromChild = value => this.setState({ ...value });
+
   render() {
+    const { totalEntries, perPage } = this.state;
     const { classes } = this.props;
     const currentPath = this.props.location.pathname;
+    const totalEntriesText = `List cases (total: ${totalEntries}, show: ${perPage})`;
 
     return (
       <React.Fragment>
@@ -47,10 +56,10 @@ class Cards extends Component {
               </Grid>
               <Grid item xs={12}>
                 <SectionHeader
-                  title="List cases"
+                  title={totalEntriesText}
                   subtitle="All cases from internal data"
                 />
-                <CardItem />
+                <CardItem getFromChild={this.getFromChild} />
               </Grid>
             </Grid>
           </Grid>

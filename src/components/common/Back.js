@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import withStyles from '@material-ui/styles/withStyles';
 import KeyboardArrowLeft from '@material-ui/icons/KeyboardArrowLeft';
 import Typography from '@material-ui/core/Typography';
-import { Link, withRouter } from 'react-router-dom';
+import Link from '@material-ui/core/Link';
 
 const styles = theme => ({
   link: {
@@ -21,7 +21,7 @@ class Back extends Component {
     return (
       <div>
         <Typography variant="h6" gutterBottom>
-          <Link className={classes.link} to={{ pathname: "/" }}>
+          <Link className={classes.link} href="/">
             <KeyboardArrowLeft />
             <span className={classes.text}>ថយទៅទិន្នន័យ</span>
           </Link>
@@ -31,4 +31,4 @@ class Back extends Component {
   }
 }
 
-export default withRouter(withStyles(styles)(Back));
+export default withStyles(styles)(Back);
