@@ -203,7 +203,6 @@ class Signup extends Component {
     },
     errorMessage: {},
     dialogOpen: false,
-    avartarLoading: true,
     buttonDisabled: false,
   };
 
@@ -340,7 +339,7 @@ class Signup extends Component {
   render() {
     const { classes } = this.props;
     const steps = getSteps();
-    const { activeStep, loading, values, errorMessage, avartarLoading, buttonDisabled } = this.state;
+    const { activeStep, loading, values, errorMessage, buttonDisabled } = this.state;
     let user = {};
     const token = inMemoryJWTManager.getToken();
     if (token) {
@@ -575,7 +574,6 @@ class Signup extends Component {
                                     alt={user.name && user.name.toUpperCase()} 
                                     src={user.picture ? user.picture : '1.png'} 
                                     className={classes.avatarSize}
-                                    onLoad={() => this.setState({ avartarLoading: false })}
                                   />
                                 </ListItem>
                                 {user.email ? (
