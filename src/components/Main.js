@@ -24,7 +24,7 @@ const styles = theme => ({
     background: `url(${backgroundShape}) no-repeat`,
     backgroundSize: "cover",
     backgroundPosition: "0 400px",
-    paddingBottom: 200,
+    paddingBottom: 100,
     minHeight: "93vh",
   },
   grid: {
@@ -100,7 +100,8 @@ class Main extends Component {
     expressAPIUrl: process.env.REACT_APP_EXPRESS_API_URL ? process.env.REACT_APP_EXPRESS_API_URL : 'http://localhost:4000',
     covidAPIDomin: 'https://covid19.mathdro.id',
     loading: true,
-    langLocale: 'kh'
+    langLocale: 'kh',
+    loaded: false,
   };
 
   async componentDidMount() {
@@ -115,9 +116,9 @@ class Main extends Component {
       if (todayData && khInternalData) {
         this.setState({ covidData: [...this.state.covidData, todayData, khInternalData], loading: false });
       }
-    }    
+    }
     const { covidAPIDomin, expressAPIUrl, covidData } = this.state;
-
+    setTimeout(() => this.setState({ loaded: true }), 200);
     await axios.get(`${expressAPIUrl}/v1/cases`, { params: { perPage: 0 } })
       .then(({ data: { data } }) => {
         const sumOfCase = _.sumBy(data, o => o.numberOfCase);
@@ -401,7 +402,7 @@ class Main extends Component {
 
   render() {
     const { classes } = this.props;
-    const { covidData, loading } = this.state;
+    const { covidData, loading, loaded } = this.state;
 
     return (
       <React.Fragment>
@@ -423,7 +424,7 @@ class Main extends Component {
               }}
             />
           </Fade>
-          {covidData && covidData.length ? _.orderBy(covidData, ['order'], ['asc']).map(({ text, data }, i) => (
+          {loaded && covidData && covidData.length ? _.orderBy(covidData, ['order'], ['asc']).map(({ text, data }, i) => (
             <React.Fragment key={i}>
               <Typography 
                 style={{ marginTop: "3.5rem", lineHeight: "1.7" }}

@@ -30,7 +30,12 @@ import Tooltip from '@material-ui/core/Tooltip';
 import Avatar from '@material-ui/core/Avatar';
 import Box from '@material-ui/core/Box';
 import Divider from '@material-ui/core/Divider';
+// import CreateIcon from '@material-ui/icons/Create';
+// import Dialog from '@material-ui/core/Dialog';
+// import DialogActions from '@material-ui/core/DialogActions';
+// import DialogContent from '@material-ui/core/DialogContent';
 import FacebookIcon from '@material-ui/icons/Facebook';
+import Skeleton from '@material-ui/lab/Skeleton';
 import FacebookLogin from 'react-facebook-login';
 import axios from 'axios';
 import inMemoryJWTManager from '../inMemoryJwt';
@@ -158,7 +163,11 @@ const styles = theme => ({
   },
   noPadding: {
     padding: 0,
-  }
+  },
+  buttonEditProfile: {
+    padding: 0,
+    minWidth: 0,
+  },
 });
 
 const getSteps = () => {
@@ -185,7 +194,9 @@ class Signup extends Component {
       email: '',
       password: '',
     },
-    errorMessage: {}
+    errorMessage: {},
+    dialogOpen: false,
+    avartarLoading: true,
   };
 
   handleNext = () => {
@@ -295,6 +306,8 @@ class Signup extends Component {
     return false;
   };
 
+  handleDialog = () => this.setState({ dialogOpen: !this.state.dialogOpen });
+
   stepActions() {
     if (this.state.activeStep === 0) {
       return "បន្តទៅចូលប្រព័ន្ធ";
@@ -308,7 +321,7 @@ class Signup extends Component {
   render() {
     const { classes } = this.props;
     const steps = getSteps();
-    const { activeStep, loading, values, errorMessage } = this.state;
+    const { activeStep, loading, values, errorMessage, avartarLoading } = this.state;
     let user = {};
     const token = inMemoryJWTManager.getToken();
     if (token) {
@@ -424,19 +437,17 @@ class Signup extends Component {
                           icon={(<FacebookIcon className={classes.facebookIcon} />)}
                           textButton="ចូលប្រព័ន្ធតាមហ្វេសប៊ុក"
                         />
-                        <div style={{ width: '100%' }}>
-                          <Box display="flex" p={1} alignItems="center" className={classes.divideFlex}>
-                            <Box p={1} flexGrow={1} className={classes.noPadding}>
-                              <Divider />
-                            </Box>
-                            <Box p={1}>
-                              ឬក៏
-                            </Box>
-                            <Box p={1} flexGrow={1} className={classes.noPadding}>
-                              <Divider />
-                            </Box>
+                        <Box display="flex" p={1} alignItems="center" className={classes.divideFlex}>
+                          <Box p={1} flexGrow={1} className={classes.noPadding}>
+                            <Divider />
                           </Box>
-                        </div>
+                          <Box p={1}>
+                            ឬក៏
+                          </Box>
+                          <Box p={1} flexGrow={1} className={classes.noPadding}>
+                            <Divider />
+                          </Box>
+                        </Box>
                         <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
                           <InputLabel error={!noEmailError} htmlFor="outlined-adornment-email">អុីមែល</InputLabel>
                           <OutlinedInput
@@ -494,17 +505,64 @@ class Signup extends Component {
                             </Typography>
                           </div>
                           <div>
-                            <Typography color="secondary" gutterBottom>
-                              អ្នកប្រើ
-                            </Typography>
+                            <Box display="flex" p={1} alignItems="center" className={classes.divideFlex}>
+                              <Box p={1} flexGrow={1} className={classes.noPadding}>
+                                <Typography color="secondary" gutterBottom>
+                                  អ្នកប្រើ
+                                </Typography>
+                              </Box>
+                              {/* <Box p={1} className={classes.noPadding}>
+                                <Button 
+                                  size="small" 
+                                  startIcon={<CreateIcon />}
+                                  className={classes.buttonEditProfile}
+                                  onClick={this.handleDialog.bind(this)}
+                                >
+                                  កែប្រែ
+                                </Button>
+                                <Dialog open={dialogOpen} onClose={this.handleDialog.bind(this)} aria-labelledby="form-dialog-title">
+                                  <DialogContent>
+                                    <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
+                                      <InputLabel error={false} htmlFor={`outlined-adornment-cases`}>Number of cases</InputLabel>
+                                      <OutlinedInput
+                                        error={false}
+                                        id={`outlined-adornment-cases`}
+                                        aria-describedby={`outlined-cases-helper-text`}
+                                        labelWidth={115}
+                                        name="numberOfCase"
+                                        onChange={() => {}}
+                                        defaultValue=""
+                                      />
+                                      <FormHelperText error={false} id={`outlined-cases-helper-text`}>
+                                        text
+                                      </FormHelperText>
+                                    </FormControl>
+                                  </DialogContent>
+                                  <DialogActions style={{ padding: "15px 24px" }}>
+                                    <Button onClick={this.handleDialog.bind(this)} color="primary" className={classes.buttonEditProfile}>
+                                      បិទ
+                                    </Button>
+                                    <Button disabled={false} onClick={() => {}} color="primary" className={classes.buttonEditProfile}>
+                                      កែ
+                                    </Button>
+                                  </DialogActions>
+                                </Dialog>
+                              </Box> */}
+                            </Box>
                             {user ? (
                               <List component="nav">
                                 <ListItem style={{ justifyContent: "center", marginBottom: "15px" }}>
+                                <Box display={avartarLoading ? 'block' : 'none'}>
+                                  <Skeleton variant="circle" className={classes.avatarSize} />
+                                </Box>
+                                <Box display={avartarLoading ? 'none' : 'block'}>
                                   <Avatar 
                                     alt={user.name && user.name.toUpperCase()} 
                                     src={user.picture ? user.picture : '1.png'} 
                                     className={classes.avatarSize}
+                                    onLoad={() => this.setState({ avartarLoading: false })}
                                   />
+                                </Box>
                                 </ListItem>
                                 {user.email ? (
                                   <ListItem>                                    
