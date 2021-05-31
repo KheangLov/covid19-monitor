@@ -35,7 +35,6 @@ import Divider from '@material-ui/core/Divider';
 // import DialogActions from '@material-ui/core/DialogActions';
 // import DialogContent from '@material-ui/core/DialogContent';
 import FacebookIcon from '@material-ui/icons/Facebook';
-import Skeleton from '@material-ui/lab/Skeleton';
 import FacebookLogin from 'react-facebook-login';
 import axios from 'axios';
 import inMemoryJWTManager from '../inMemoryJwt';
@@ -169,6 +168,13 @@ const styles = theme => ({
     padding: 0,
     minWidth: 0,
   },
+  buttonProgress: {
+    position: 'absolute',
+    top: '50%',
+    left: '50%',
+    marginTop: -12,
+    marginLeft: -12,
+  },
 });
 
 const getSteps = () => {
@@ -198,15 +204,23 @@ class Signup extends Component {
     errorMessage: {},
     dialogOpen: false,
     avartarLoading: true,
+    buttonDisabled: false,
   };
 
   handleNext = () => {
+    this.setState(state => ({
+      activeStep: state.activeStep + 1,
+      buttonDisabled: false,
+    }));
+  };
+
+  redirectInMs = () => {
     this.setState(state => ({
       activeStep: state.activeStep + 1
     }));
     if (this.state.activeStep === 2) {
       setTimeout(() => window.location.href = '/', 5000);
-    }
+    }    
   };
 
   handleBack = () => {
@@ -254,7 +268,8 @@ class Signup extends Component {
           errorMessage: {
             ...this.state.errorMessage,
             ...obj
-          }
+          },
+          buttonDisabled: false,
         });
       });
     } else if (data && data.message) {
@@ -263,16 +278,18 @@ class Signup extends Component {
         errorMessage: {
           email: message,
           password: message,
-        }
+        },
+        buttonDisabled: false,
       });
     }
   };
 
   handleRegister = () => {
+    this.setState({ buttonDisabled: true });
     axios.post(`${this.state.expressAPIUrl}/v1/auth/register`, this.state.formData)
       .then(({ data }) => {        
         inMemoryJWTManager.setToken(data);
-        this.setState({ activeStep: 2 });
+        this.setState({ activeStep: 2, buttonDisabled: false });
       })
       .catch(err => {
         const { response: { data } } = err;
@@ -281,8 +298,12 @@ class Signup extends Component {
   };
 
   handleLogin = () => {
+    this.setState({ buttonDisabled: true });
     axios.post(`${this.state.expressAPIUrl}/v1/auth/login`, this.state.formData)
-      .then(({ data }) => inMemoryJWTManager.setToken(data))
+      .then(({ data }) => {
+        inMemoryJWTManager.setToken(data);
+        this.handleNext();
+      })
       .catch(err => {
         const { response: { data } } = err;
         this.handleError(data);
@@ -292,7 +313,10 @@ class Signup extends Component {
   responseFacebook = ({ accessToken: access_token }) => {
     if (access_token) {
       axios.post(`${this.state.expressAPIUrl}/v1/auth/facebook`, { access_token })
-        .then(({ data }) => inMemoryJWTManager.setToken(data))
+        .then(({ data }) => {
+          inMemoryJWTManager.setToken(data);
+          this.handleNext();
+        })
         .catch(err => {
           const { response: { data } } = err;
           this.handleError(data);
@@ -316,7 +340,7 @@ class Signup extends Component {
   render() {
     const { classes } = this.props;
     const steps = getSteps();
-    const { activeStep, loading, values, errorMessage, avartarLoading } = this.state;
+    const { activeStep, loading, values, errorMessage, avartarLoading, buttonDisabled } = this.state;
     let user = {};
     const token = inMemoryJWTManager.getToken();
     if (token) {
@@ -547,17 +571,12 @@ class Signup extends Component {
                             {user ? (
                               <List component="nav">
                                 <ListItem style={{ justifyContent: "center", marginBottom: "15px" }}>
-                                <Box display={avartarLoading ? 'block' : 'none'}>
-                                  <Skeleton variant="circle" className={classes.avatarSize} />
-                                </Box>
-                                <Box display={avartarLoading ? 'none' : 'block'}>
                                   <Avatar 
                                     alt={user.name && user.name.toUpperCase()} 
                                     src={user.picture ? user.picture : '1.png'} 
                                     className={classes.avatarSize}
                                     onLoad={() => this.setState({ avartarLoading: false })}
                                   />
-                                </Box>
                                 </ListItem>
                                 {user.email ? (
                                   <ListItem>                                    
@@ -623,7 +642,7 @@ class Signup extends Component {
                               <Fade
                                 in={loading}
                                 style={{
-                                  transitionDelay: loading ? "800ms" : "0ms"
+                                  transitionDelay: loading ? "300ms" : "0ms"
                                 }}
                                 unmountOnExit
                               >
@@ -663,33 +682,41 @@ class Signup extends Component {
                         </Button>
                       )}
                       {activeStep === 0 ? (
-                        <Button 
-                          variant="contained" 
-                          color="secondary" 
+                        <div style={{ position: 'relative' }}>
+                          <Button 
+                            variant="contained" 
+                            color="secondary" 
+                            size="large"
+                            onClick={this.handleRegister}
+                            style={
+                              this.state.receivingAccount.length
+                                ? { background: classes.button, color: "white", marginRight: "10px" }
+                                : { marginRight: "10px" }
+                            }
+                            disabled={buttonDisabled}
+                          >
+                            ស្នើរសំុ
+                          </Button>
+                          {buttonDisabled && <CircularProgress size={24} className={classes.buttonProgress} />}
+                        </div>
+                      ) : ''}
+                      <div style={{ position: 'relative' }}>
+                        <Button
+                          variant="contained"
+                          color="primary"
+                          onClick={this.stepActions() === "ចូលប្រព័ន្ធ" ? this.handleLogin : this.redirectInMs}
                           size="large"
-                          onClick={this.handleRegister}
                           style={
                             this.state.receivingAccount.length
-                              ? { background: classes.button, color: "white", marginRight: "10px" }
-                              : { marginRight: "10px" }
+                              ? { background: classes.button, color: "white" }
+                              : {}
                           }
+                          disabled={buttonDisabled}
                         >
-                          ស្នើរសំុ
+                          {this.stepActions()}
                         </Button>
-                      ) : ''}
-                      <Button
-                        variant="contained"
-                        color="primary"
-                        onClick={this.stepActions() === "ចូលប្រព័ន្ធ" ? this.handleLogin : this.handleNext}
-                        size="large"
-                        style={
-                          this.state.receivingAccount.length
-                            ? { background: classes.button, color: "white" }
-                            : {}
-                        }
-                      >
-                        {this.stepActions()}
-                      </Button>
+                        {buttonDisabled && <CircularProgress size={24} className={classes.buttonProgress} />}
+                      </div>
                     </div>
                   )}
                 </div>
