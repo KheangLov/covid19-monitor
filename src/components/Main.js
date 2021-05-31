@@ -394,6 +394,21 @@ class Main extends Component {
         <CssBaseline />
         <Topbar />
         <div className={classes.root} style={{ textAlign: "center" }}>
+          <Fade
+            in={loading}
+            style={{
+              transitionDelay: loading ? "100ms" : "0ms",              
+            }}
+            unmountOnExit
+          >
+            <CircularProgress
+              style={{                
+                marginTop: 50,
+                width: 40,
+                height: 40
+              }}
+            />
+          </Fade>
           {covidData && covidData.length ? _.orderBy(covidData, ['order'], ['asc']).map(({ text, data }, i) => (
             <React.Fragment key={i}>
               <Typography 
@@ -459,23 +474,7 @@ class Main extends Component {
                 </Grid>
               </Grid>
             </React.Fragment>
-          )) : (
-            <Fade
-              in={loading}
-              style={{
-                transitionDelay: loading ? "100ms" : "0ms",              
-              }}
-              unmountOnExit
-            >
-              <CircularProgress
-                style={{                
-                  marginTop: 50,
-                  width: 40,
-                  height: 40
-                }}
-              />
-            </Fade>
-          )}
+          )) : ''}
         </div>
       </React.Fragment>
     );
