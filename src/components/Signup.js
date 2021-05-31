@@ -281,10 +281,7 @@ class Signup extends Component {
 
   handleLogin = () => {
     axios.post(`${this.state.expressAPIUrl}/v1/auth/login`, this.state.formData)
-      .then(({ data }) => {        
-        inMemoryJWTManager.setToken(data);
-        this.handleNext();
-      })
+      .then(({ data }) => inMemoryJWTManager.setToken(data))
       .catch(err => {
         const { response: { data } } = err;
         this.handleError(data);
@@ -294,10 +291,7 @@ class Signup extends Component {
   responseFacebook = ({ accessToken: access_token }) => {
     if (access_token) {
       axios.post(`${this.state.expressAPIUrl}/v1/auth/facebook`, { access_token })
-        .then(({ data }) => {   
-          inMemoryJWTManager.setToken(data);
-          this.handleNext();
-        })
+        .then(({ data }) => inMemoryJWTManager.setToken(data))
         .catch(err => {
           const { response: { data } } = err;
           this.handleError(data);
