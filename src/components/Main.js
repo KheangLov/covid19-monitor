@@ -34,7 +34,7 @@ const styles = theme => ({
     }
   },
   paper: {
-    padding: theme.spacing(3),
+    padding: "24px 0 !important",
     textAlign: "left",
     color: theme.palette.text.secondary
   },
