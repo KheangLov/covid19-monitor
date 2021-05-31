@@ -57,6 +57,7 @@ const styles = theme => ({
     backgroundPosition: "0 400px",
     marginTop: 10,
     padding: 20,
+    paddingBottom: 80,
     minHeight: "100vh"
   },
   grid: {
