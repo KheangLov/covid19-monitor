@@ -27,6 +27,8 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import IconButton from '@material-ui/core/IconButton';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Tooltip from '@material-ui/core/Tooltip';
+import FacebookLogin from 'react-facebook-login';
+import FacebookIcon from '@material-ui/icons/Facebook';
 import axios from 'axios';
 import inMemoryJWTManager from '../inMemoryJwt';
 
@@ -87,12 +89,16 @@ const styles = theme => ({
     margin: theme.spacing(1)
   },
   stepper: {
-    backgroundColor: "transparent"
+    backgroundColor: "transparent",
+    maxWidth: "550px",
+    margin: "0 auto",
   },
   paper: {
     padding: theme.spacing(4),
     textAlign: "left",
-    color: theme.palette.text.secondary
+    color: theme.palette.text.secondary,
+    maxWidth: "400px",
+    margin: "0 auto",
   },
   topInfo: {
     display: "flex",
@@ -115,6 +121,29 @@ const styles = theme => ({
   textOverflow: {
     overflow: 'hidden',
     textOverflow: 'ellipsis',
+  },
+  facebookLoginButton: {
+    padding: "8px 22px",
+    fontSize: "0.9375rem",
+    width: "100%",
+    color: "#ffffff",
+    backgroundColor: "#303f9f",
+    boxShadow: "0px 3px 1px -2px rgb(0 0 0 / 20%), 0px 2px 2px 0px rgb(0 0 0 / 14%), 0px 1px 5px 0px rgb(0 0 0 / 12%)",
+    boxSizing: "border-box",
+    transition: "background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+    fontFamily: "inherit !important",
+    fontWeight: 500,
+    lineHeight: "1.75",
+    borderRadius: "4px",
+    border: 0,
+    cursor: "pointer",
+    margin: 0,
+  },
+  facebookIcon: {
+    marginRight: "8px",
+    display: "inline",
+    position: "relative",
+    top: "0.3rem",
   }
 });
 
@@ -125,7 +154,7 @@ const getSteps = () => {
 class Signup extends Component {
   state = {
     expressAPIUrl: process.env.REACT_APP_EXPRESS_API_URL ? process.env.REACT_APP_EXPRESS_API_URL : 'http://localhost:4000',
-    activeStep: inMemoryJWTManager.getToken() ? 2 : 0,
+    activeStep: inMemoryJWTManager.getToken() ? 2 : 1,
     receivingAccount: "",
     termsChecked: false,
     loading: true,
@@ -150,7 +179,7 @@ class Signup extends Component {
       activeStep: state.activeStep + 1
     }));
     if (this.state.activeStep === 2) {
-      setTimeout(() => window.location.href = '/', 1500);
+      setTimeout(() => window.location.href = '/', 5000);
     }
   };
 
@@ -235,6 +264,22 @@ class Signup extends Component {
         const { response: { data } } = err;
         this.handleError(data);
       });
+  };
+
+  responseFacebook = ({ accessToken: access_token }) => {
+    if (access_token) {
+      axios.post(`${this.state.expressAPIUrl}/v1/auth/facebook`, { params: { access_token } })
+      .then((res) => {  
+        console.log(res);      
+        // inMemoryJWTManager.setToken(data);
+        // this.handleNext();
+      })
+      .catch(err => {
+        const { response: { data } } = err;
+        this.handleError(data);
+      });
+    }
+    return false;
   };
 
   stepActions() {
@@ -373,7 +418,7 @@ class Signup extends Component {
                             {!noEmailError && errorMessage.email}
                           </FormHelperText>
                         </FormControl>
-                        <FormControl fullWidth variant="outlined">
+                        <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
                           <InputLabel error={!noPasswordError} htmlFor="outlined-adornment-password">លេខសំងាត់</InputLabel>
                           <OutlinedInput
                             error={!noPasswordError}
@@ -399,6 +444,14 @@ class Signup extends Component {
                             {!noPasswordError && errorMessage.password}
                           </FormHelperText>
                         </FormControl>
+                        <FacebookLogin
+                          appId="162878389053284"
+                          fields="name,email,picture"
+                          callback={this.responseFacebook}
+                          cssClass={classes.facebookLoginButton}
+                          icon={(<FacebookIcon className={classes.facebookIcon} />)}
+                          textButton="ចូលប្រព័ន្ធតាមហ្វេសប៊ុក"
+                        />
                       </Paper>
                     </div>
                   )}
