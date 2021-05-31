@@ -350,7 +350,7 @@ class Main extends Component {
     const { langLocale } = this.state;
     let updown = first - second;
     let text = '';
-    let updownCal = Math.abs((updown / first) * 100).toFixed(2);
+    let updownCal = Math.abs((Math.abs(updown) / second) * 100).toFixed(2);
     text = updown > 0 ? 'កើន ' : 'ថយ ';
     updown = this.numberFormat(Math.abs(updown));
     if (langLocale === 'kh') {
