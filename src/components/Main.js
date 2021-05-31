@@ -24,11 +24,12 @@ const styles = theme => ({
     background: `url(${backgroundShape}) no-repeat`,
     backgroundSize: "cover",
     backgroundPosition: "0 400px",
-    paddingBottom: 200
+    paddingBottom: 200,
+    minHeight: "93vh",
   },
   grid: {
     width: 1200,
-    marginTop: 40,
+    marginTop: 20,
     [theme.breakpoints.down("sm")]: {
       width: "calc(100% - 20px)"
     }

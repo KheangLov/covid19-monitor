@@ -112,6 +112,10 @@ const styles = theme => ({
   marginBottom: {
     marginBottom: theme.spacing(3),
   },
+  textOverflow: {
+    overflow: 'hidden',
+    textOverflow: 'ellipsis',
+  }
 });
 
 const getSteps = () => {
@@ -423,7 +427,10 @@ class Signup extends Component {
                                     </ListItemIcon>
                                     <Tooltip title={user.email}>
                                       <ListItemText
-                                        style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                        classes={{ 
+                                          root: classes.textOverflow,
+                                          primary: classes.textOverflow,
+                                        }}
                                         inset
                                         primary={user.email}
                                       />
@@ -437,7 +444,10 @@ class Signup extends Component {
                                     </ListItemIcon>
                                     <Tooltip title={user.name}>
                                       <ListItemText
-                                        style={{ overflow: 'hidden', textOverflow: 'ellipsis' }}
+                                        classes={{ 
+                                          root: classes.textOverflow,
+                                          primary: classes.textOverflow,
+                                        }}
                                         inset
                                         primary={user.name}
                                       />
