@@ -27,6 +27,7 @@ import VisibilityOff from '@material-ui/icons/VisibilityOff';
 import IconButton from '@material-ui/core/IconButton';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Tooltip from '@material-ui/core/Tooltip';
+import Avatar from '@material-ui/core/Avatar';
 import FacebookLogin from 'react-facebook-login';
 import FacebookIcon from '@material-ui/icons/Facebook';
 import axios from 'axios';
@@ -49,7 +50,7 @@ const styles = theme => ({
     backgroundPosition: "0 400px",
     marginTop: 10,
     padding: 20,
-    paddingBottom: 500
+    minHeight: "100vh"
   },
   grid: {
     margin: `0 ${theme.spacing(2)}px`
@@ -61,7 +62,6 @@ const styles = theme => ({
     width: "80%"
   },
   logo: {
-    marginBottom: 24,
     display: "flex",
     justifyContent: "center"
   },
@@ -144,6 +144,10 @@ const styles = theme => ({
     display: "inline",
     position: "relative",
     top: "0.3rem",
+  },
+  avatarSize: {
+    width: theme.spacing(10),
+    height: theme.spacing(10),
   }
 });
 
@@ -471,9 +475,16 @@ class Signup extends Component {
                               អ្នកប្រើ
                             </Typography>
                             {user ? (
-                              <List component="nav">                                
+                              <List component="nav">
+                                <ListItem style={{ justifyContent: "center", marginBottom: "15px" }}>
+                                  <Avatar 
+                                    alt={user.name && user.name.toUpperCase()} 
+                                    src={user.picture ? user.picture : '1.png'} 
+                                    className={classes.avatarSize}
+                                  />
+                                </ListItem>
                                 {user.email ? (
-                                  <ListItem>
+                                  <ListItem>                                    
                                     <ListItemIcon>
                                       <DoneIcon style={{ color: "rgb(5, 181, 132)" }} />
                                     </ListItemIcon>

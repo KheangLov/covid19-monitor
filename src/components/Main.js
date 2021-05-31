@@ -113,10 +113,9 @@ class Main extends Component {
     if (inMemoryJWTManager.getCaseData()) {
       const { todayData, khInternalData } = JSON.parse(inMemoryJWTManager.getCaseData());
       if (todayData && khInternalData) {
-        this.setState({ covidData: [...this.state.covidData, todayData, khInternalData] });
+        this.setState({ covidData: [...this.state.covidData, todayData, khInternalData], loading: false });
       }
     }    
-    this.setState({ loading: false });
     const { covidAPIDomin, expressAPIUrl, covidData } = this.state;
 
     await axios.get(`${expressAPIUrl}/v1/cases`, { params: { perPage: 0 } })
