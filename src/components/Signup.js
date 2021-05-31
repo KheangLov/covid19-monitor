@@ -123,7 +123,7 @@ const styles = theme => ({
     textOverflow: 'ellipsis',
   },
   facebookLoginButton: {
-    padding: "8px 22px",
+    padding: "8px",
     fontSize: "0.9375rem",
     width: "100%",
     color: "#ffffff",
@@ -268,16 +268,15 @@ class Signup extends Component {
 
   responseFacebook = ({ accessToken: access_token }) => {
     if (access_token) {
-      axios.post(`${this.state.expressAPIUrl}/v1/auth/facebook`, { params: { access_token } })
-      .then((res) => {  
-        console.log(res);      
-        // inMemoryJWTManager.setToken(data);
-        // this.handleNext();
-      })
-      .catch(err => {
-        const { response: { data } } = err;
-        this.handleError(data);
-      });
+      axios.post(`${this.state.expressAPIUrl}/v1/auth/facebook`, { access_token })
+        .then(({ data }) => {   
+          inMemoryJWTManager.setToken(data);
+          this.handleNext();
+        })
+        .catch(err => {
+          const { response: { data } } = err;
+          this.handleError(data);
+        });
     }
     return false;
   };
