@@ -261,6 +261,8 @@ class CardItem extends Component {
   render() {
     const { classes, type } = this.props;
     const { errorMessage, createdStatus, updatedStatus, buttonDisabled, dataList, edit, formData, dialogOpen, loading, page, totalPages, isLoading } = this.state;
+    const token = inMemoryJWTManager.getToken();
+    const { user } = JSON.parse(token);
     const currentDate = this.getCurrentDate();
     const noNumOfCasesError = !errorMessage.numberOfCase;
     const noNumOfDeathError = !errorMessage.numberOfDeath;
@@ -327,71 +329,75 @@ class CardItem extends Component {
                 <Typography variant="h6" gutterBottom>
                   {this.getCurrentDate(new Date(date).toString())}
                 </Typography>
-                <Button variant="contained" color="primary" onClick={this.handleClickOpen.bind(this, _id)}>
-                  Edit
-                </Button>
-                <Dialog open={dialogOpen && dialogOpen[`dialog_${_id}`] ? dialogOpen[`dialog_${_id}`] : false} onClose={this.handleClose.bind(this, _id)} aria-labelledby="form-dialog-title">
-                  {updatedStatus && updatedStatus.status && parseInt(updatedStatus.status) === 201 ? (
-                    <DialogTitle id="form-dialog-title" style={{ marginLeft: "8px", color: "rgb(5, 181, 132)" }} display="inline" color='textSecondary' variant="body2">
-                      {updatedStatus.statusText ? updatedStatus.statusText : 'Edit'} success!
-                    </DialogTitle>
-                  ) : ''}
-                  <DialogContent>
-                    <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
-                      <InputLabel error={!noNumOfCasesError} htmlFor={`outlined-adornment-cases-${_id}`}>Number of cases</InputLabel>
-                      <OutlinedInput
-                        error={!noNumOfCasesError}
-                        id={`outlined-adornment-cases-${_id}`}
-                        aria-describedby={`outlined-cases-helper-text-${_id}`}
-                        labelWidth={115}
-                        name="numberOfCase"
-                        onChange={this.handleChange}
-                        defaultValue={numberOfCase && numberOfCase}
-                      />
-                      <FormHelperText error={!noNumOfCasesError} id={`outlined-cases-helper-text-${_id}`} style={!noNumOfCasesError ? { marginBottom: "10px" } : {}}>
-                        {!noNumOfCasesError && errorMessage.numberOfCase}
-                      </FormHelperText>
-                    </FormControl>
-                    <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
-                      <InputLabel error={!noNumOfDeathError} htmlFor={`outlined-adornment-death-${_id}`}>Number of death</InputLabel>
-                      <OutlinedInput
-                        error={!noNumOfDeathError}
-                        id={`outlined-adornment-death-${_id}`}
-                        aria-describedby={`outlined-death-helper-text-${_id}`}
-                        labelWidth={120}
-                        name="numberOfDeath"
-                        onChange={this.handleChange}
-                        defaultValue={numberOfDeath && numberOfDeath}
-                      />
-                      <FormHelperText error={!noNumOfDeathError} id={`outlined-death-helper-text-${_id}`} style={!noNumOfDeathError ? { marginBottom: "10px" } : {}}>
-                        {!noNumOfDeathError && errorMessage.numberOfDeath}
-                      </FormHelperText>
-                    </FormControl>
-                    <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
-                      <InputLabel error={!noNumOfRecoveredError} htmlFor={`outlined-adornment-recovered-${_id}`}>Number of recovered</InputLabel>
-                      <OutlinedInput
-                        error={!noNumOfRecoveredError}
-                        id={`outlined-adornment-recovered-${_id}`}
-                        aria-describedby={`outlined-recovered-helper-text-${_id}`}
-                        labelWidth={150}
-                        name="numberOfRecovered"
-                        onChange={this.handleChange}
-                        defaultValue={numberOfRecovered && numberOfRecovered}
-                      />
-                      <FormHelperText error={!noNumOfRecoveredError} id={`outlined-recovered-helper-text-${_id}`} style={!noNumOfRecoveredError ? { marginBottom: "10px" } : {}}>
-                        {!noNumOfRecoveredError && errorMessage.numberOfRecovered}
-                      </FormHelperText>
-                    </FormControl>
-                  </DialogContent>
-                  <DialogActions>
-                    <Button onClick={this.handleClose.bind(this, _id)} color="primary">
-                      Cancel
-                    </Button>
-                    <Button disabled={buttonDisabled} onClick={this.handleUpdate.bind(this, _id)} color="primary">
+                {user && user.role === 'admin' && (
+                  <React.Fragment>
+                    <Button variant="contained" color="primary" onClick={this.handleClickOpen.bind(this, _id)}>
                       Edit
                     </Button>
-                  </DialogActions>
-                </Dialog>
+                    <Dialog open={dialogOpen && dialogOpen[`dialog_${_id}`] ? dialogOpen[`dialog_${_id}`] : false} onClose={this.handleClose.bind(this, _id)} aria-labelledby="form-dialog-title">
+                      {updatedStatus && updatedStatus.status && parseInt(updatedStatus.status) === 201 ? (
+                        <DialogTitle id="form-dialog-title" style={{ marginLeft: "8px", color: "rgb(5, 181, 132)" }} display="inline" color='textSecondary' variant="body2">
+                          {updatedStatus.statusText ? updatedStatus.statusText : 'Edit'} success!
+                        </DialogTitle>
+                      ) : ''}
+                      <DialogContent>
+                        <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
+                          <InputLabel error={!noNumOfCasesError} htmlFor={`outlined-adornment-cases-${_id}`}>Number of cases</InputLabel>
+                          <OutlinedInput
+                            error={!noNumOfCasesError}
+                            id={`outlined-adornment-cases-${_id}`}
+                            aria-describedby={`outlined-cases-helper-text-${_id}`}
+                            labelWidth={115}
+                            name="numberOfCase"
+                            onChange={this.handleChange}
+                            defaultValue={numberOfCase && numberOfCase}
+                          />
+                          <FormHelperText error={!noNumOfCasesError} id={`outlined-cases-helper-text-${_id}`} style={!noNumOfCasesError ? { marginBottom: "10px" } : {}}>
+                            {!noNumOfCasesError && errorMessage.numberOfCase}
+                          </FormHelperText>
+                        </FormControl>
+                        <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
+                          <InputLabel error={!noNumOfDeathError} htmlFor={`outlined-adornment-death-${_id}`}>Number of death</InputLabel>
+                          <OutlinedInput
+                            error={!noNumOfDeathError}
+                            id={`outlined-adornment-death-${_id}`}
+                            aria-describedby={`outlined-death-helper-text-${_id}`}
+                            labelWidth={120}
+                            name="numberOfDeath"
+                            onChange={this.handleChange}
+                            defaultValue={numberOfDeath && numberOfDeath}
+                          />
+                          <FormHelperText error={!noNumOfDeathError} id={`outlined-death-helper-text-${_id}`} style={!noNumOfDeathError ? { marginBottom: "10px" } : {}}>
+                            {!noNumOfDeathError && errorMessage.numberOfDeath}
+                          </FormHelperText>
+                        </FormControl>
+                        <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
+                          <InputLabel error={!noNumOfRecoveredError} htmlFor={`outlined-adornment-recovered-${_id}`}>Number of recovered</InputLabel>
+                          <OutlinedInput
+                            error={!noNumOfRecoveredError}
+                            id={`outlined-adornment-recovered-${_id}`}
+                            aria-describedby={`outlined-recovered-helper-text-${_id}`}
+                            labelWidth={150}
+                            name="numberOfRecovered"
+                            onChange={this.handleChange}
+                            defaultValue={numberOfRecovered && numberOfRecovered}
+                          />
+                          <FormHelperText error={!noNumOfRecoveredError} id={`outlined-recovered-helper-text-${_id}`} style={!noNumOfRecoveredError ? { marginBottom: "10px" } : {}}>
+                            {!noNumOfRecoveredError && errorMessage.numberOfRecovered}
+                          </FormHelperText>
+                        </FormControl>
+                      </DialogContent>
+                      <DialogActions>
+                        <Button onClick={this.handleClose.bind(this, _id)} color="primary">
+                          Cancel
+                        </Button>
+                        <Button disabled={buttonDisabled} onClick={this.handleUpdate.bind(this, _id)} color="primary">
+                          Edit
+                        </Button>
+                      </DialogActions>
+                    </Dialog>
+                  </React.Fragment>
+                )}
               </div>
             </div>
           </Paper>

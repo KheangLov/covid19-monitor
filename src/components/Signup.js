@@ -28,8 +28,10 @@ import IconButton from '@material-ui/core/IconButton';
 import FormHelperText from '@material-ui/core/FormHelperText';
 import Tooltip from '@material-ui/core/Tooltip';
 import Avatar from '@material-ui/core/Avatar';
-import FacebookLogin from 'react-facebook-login';
+import Box from '@material-ui/core/Box';
+import Divider from '@material-ui/core/Divider';
 import FacebookIcon from '@material-ui/icons/Facebook';
+import FacebookLogin from 'react-facebook-login';
 import axios from 'axios';
 import inMemoryJWTManager from '../inMemoryJwt';
 
@@ -140,7 +142,7 @@ const styles = theme => ({
     margin: 0,
   },
   facebookIcon: {
-    marginRight: "8px",
+    marginRight: "8px",    
     display: "inline",
     position: "relative",
     top: "0.3rem",
@@ -148,6 +150,14 @@ const styles = theme => ({
   avatarSize: {
     width: theme.spacing(10),
     height: theme.spacing(10),
+  },
+  divideFlex: {
+    padding: 3,
+    marginTop: theme.spacing(2),
+    marginBottom: theme.spacing(2),
+  },
+  noPadding: {
+    padding: 0,
   }
 });
 
@@ -406,6 +416,27 @@ class Signup extends Component {
                   {activeStep === 1 && (
                     <div className={classes.smallContainer}>
                       <Paper className={classes.paper}>
+                        <FacebookLogin
+                          appId="162878389053284"
+                          fields="name,email,picture"
+                          callback={this.responseFacebook}
+                          cssClass={classes.facebookLoginButton}
+                          icon={(<FacebookIcon className={classes.facebookIcon} />)}
+                          textButton="ចូលប្រព័ន្ធតាមហ្វេសប៊ុក"
+                        />
+                        <div style={{ width: '100%' }}>
+                          <Box display="flex" p={1} alignItems="center" className={classes.divideFlex}>
+                            <Box p={1} flexGrow={1} className={classes.noPadding}>
+                              <Divider />
+                            </Box>
+                            <Box p={1}>
+                              ឬក៏
+                            </Box>
+                            <Box p={1} flexGrow={1} className={classes.noPadding}>
+                              <Divider />
+                            </Box>
+                          </Box>
+                        </div>
                         <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
                           <InputLabel error={!noEmailError} htmlFor="outlined-adornment-email">អុីមែល</InputLabel>
                           <OutlinedInput
@@ -421,7 +452,7 @@ class Signup extends Component {
                             {!noEmailError && errorMessage.email}
                           </FormHelperText>
                         </FormControl>
-                        <FormControl fullWidth className={clsx(classes.marginBottom)} variant="outlined">
+                        <FormControl fullWidth variant="outlined">
                           <InputLabel error={!noPasswordError} htmlFor="outlined-adornment-password">លេខសំងាត់</InputLabel>
                           <OutlinedInput
                             error={!noPasswordError}
@@ -447,14 +478,6 @@ class Signup extends Component {
                             {!noPasswordError && errorMessage.password}
                           </FormHelperText>
                         </FormControl>
-                        <FacebookLogin
-                          appId="162878389053284"
-                          fields="name,email,picture"
-                          callback={this.responseFacebook}
-                          cssClass={classes.facebookLoginButton}
-                          icon={(<FacebookIcon className={classes.facebookIcon} />)}
-                          textButton="ចូលប្រព័ន្ធតាមហ្វេសប៊ុក"
-                        />
                       </Paper>
                     </div>
                   )}

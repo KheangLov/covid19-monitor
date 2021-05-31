@@ -30,7 +30,7 @@ const styles = theme => ({
   grid: {
     width: 1200,
     marginTop: 10,
-    [theme.breakpoints.down("sm")]: {
+    [theme.breakpoints.down("lg")]: {
       width: "calc(100% - 20px)"
     }
   },
@@ -442,7 +442,7 @@ class Main extends Component {
                   className={classes.grid}
                 >
                   {data && data.length ? data.map(({ text: sub_text, value, color, percent, today, ytd, updown, patient }, index) => (
-                    <Grid item xs={12} md={4} key={index}>
+                    <Grid item xs={12} md={6} lg={4} key={index}>
                       <Paper className={classes.paper}>
                         <div className={classes.box}>
                           <Typography

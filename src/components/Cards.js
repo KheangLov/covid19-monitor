@@ -5,6 +5,7 @@ import Grid from "@material-ui/core/Grid";
 import CardItem from "./cards/CardItem";
 import Topbar from "./Topbar";
 import SectionHeader from "./typo/SectionHeader";
+import inMemoryJWTManager from '../inMemoryJwt';
 const backgroundShape = require("../images/shape.svg");
 
 const styles = theme => ({
@@ -17,7 +18,8 @@ const styles = theme => ({
     backgroundPosition: "0 400px",
     marginTop: 20,
     padding: 20,
-    paddingBottom: 200
+    paddingBottom: 80,
+    minHeight: "90vh",
   },
   grid: {
     width: 1000
@@ -37,6 +39,8 @@ class Cards extends Component {
     const { classes } = this.props;
     const currentPath = this.props.location.pathname;
     const totalEntriesText = `List cases (total: ${totalEntries}, show: ${perPage})`;
+    const token = inMemoryJWTManager.getToken();
+    const { user } = JSON.parse(token);
 
     return (
       <React.Fragment>
@@ -51,9 +55,11 @@ class Cards extends Component {
               container
               className={classes.grid}
             >
-              <Grid item xs={12} style={{ paddingBottom: 0 }}>
-                <CardItem type="form" />
-              </Grid>
+              {user && user.role === 'admin' && (
+                <Grid item xs={12} style={{ paddingBottom: 0 }}>
+                  <CardItem type="form" />
+                </Grid>
+              )}                              
               <Grid item xs={12}>
                 <SectionHeader
                   title={totalEntriesText}
