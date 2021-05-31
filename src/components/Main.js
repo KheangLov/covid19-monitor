@@ -119,7 +119,7 @@ class Main extends Component {
     this.setState({ loading: false });
     const { covidAPIDomin, expressAPIUrl, covidData } = this.state;
 
-    await axios.get(`${expressAPIUrl}/v1/cases`)
+    await axios.get(`${expressAPIUrl}/v1/cases`, { params: { perPage: 0 } })
       .then(({ data: { data } }) => {
         const sumOfCase = _.sumBy(data, o => o.numberOfCase);
         const sumOfDeath = _.sumBy(data, o => o.numberOfDeath);
@@ -130,7 +130,6 @@ class Main extends Component {
           numberOfDeath: numberOfDeathYtd, 
           numberOfRecovered: numberOfRecoveredYtd,
         } = _.orderBy(data, ['date'], ['asc'])[data.length - 2];
-
         const covidDataFilter = covidData.filter(item => ![1, 2].includes(item.order));
 
         const todayData = {
