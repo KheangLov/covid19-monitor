@@ -29,7 +29,6 @@ const styles = theme => ({
   },
   grid: {
     width: 1200,
-    marginTop: 20,
     [theme.breakpoints.down("sm")]: {
       width: "calc(100% - 20px)"
     }
