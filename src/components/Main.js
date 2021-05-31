@@ -152,6 +152,7 @@ class Main extends Component {
           ]
         };
 
+        const patientNum = sumOfCase - sumOfDeath - sumOfRecovered;
         const khInternalData = {
           order: 2,
           text: "ករណីឆ្លងសរុប, ទិន្នន័យក្នុងប្រព័ន្ធ",
@@ -160,11 +161,14 @@ class Main extends Component {
               text: 'ករណីឆ្លង',
               value: this.numberTranslate(this.numberFormat(sumOfCase)),
               color: '#ff9800',
+              patient: this.numberTranslate(this.numberFormat(patientNum)),
+              percent: this.numberTranslate(((patientNum * 100) / sumOfCase).toFixed(2)),
             },
             {
               text: 'ករណីស្លាប់',
               value: this.numberTranslate(this.numberFormat(sumOfDeath)),
-              color: 'rgb(236, 49, 75)',        
+              color: 'rgb(236, 49, 75)',   
+              percent: this.numberTranslate(((sumOfDeath * 100) / sumOfCase).toFixed(2))
             },
             {
               text: 'ករណីជា',
@@ -213,6 +217,7 @@ class Main extends Component {
 
     await axios.get(`${covidAPIDomin}/api/countries/KH`)
       .then(({ data }) => {
+        const patientNum = data.confirmed.value - data.deaths.value - data.recovered.value;
         const khData = {
           order: 3,
           text: "ករណីឆ្លងសរុប, ទិន្នន័យក្រៅប្រព័ន្ធ",
@@ -221,11 +226,14 @@ class Main extends Component {
               text: 'ករណីឆ្លង',
               value: this.numberTranslate(this.numberFormat(data.confirmed.value)),
               color: '#ff9800',
+              patient: this.numberTranslate(this.numberFormat(patientNum)),
+              percent: this.numberTranslate(((patientNum * 100) / data.confirmed.value).toFixed(2)),
             },
             {
               text: 'ករណីស្លាប់',
               value: this.numberTranslate(this.numberFormat(data.deaths.value)),
-              color: 'rgb(236, 49, 75)',              
+              color: 'rgb(236, 49, 75)',
+              percent: this.numberTranslate(((data.deaths.value * 100) / data.confirmed.value).toFixed(2))            
             },
             {
               text: 'ករណីជា',
@@ -241,6 +249,7 @@ class Main extends Component {
 
     await axios.get(`${this.state.covidAPIDomin}/api`)
       .then(({ data }) => {
+        const patientNum = data.confirmed.value - data.deaths.value - data.recovered.value;
         const allData = {
           order: 4,
           text: 'ករណីឆ្លងទូទាំងសកលលោក',
@@ -249,11 +258,14 @@ class Main extends Component {
               text: 'ករណីឆ្លង',
               value: this.numberTranslate(this.numberFormat(data.confirmed.value)),
               color: '#ff9800',
+              patient: this.numberTranslate(this.numberFormat(patientNum)),
+              percent: this.numberTranslate(((patientNum * 100) / data.confirmed.value).toFixed(2)),
             },
             {
               text: 'ករណីស្លាប់',
               value: this.numberTranslate(this.numberFormat(data.deaths.value)),
               color: 'rgb(236, 49, 75)',
+              percent: this.numberTranslate(((data.deaths.value * 100) / data.confirmed.value).toFixed(2))
             },
             {
               text: 'ករណីជា',
@@ -292,6 +304,9 @@ class Main extends Component {
         val.text = this.dateStringFormatted(val.date);
       }
       val.data = val.data.map(v => {
+        if (v.patient) {
+          v.patient = this.numberTranslate(v.patient);
+        }
         if (v.value) {
           v.value = this.numberTranslate(v.value);
         }
@@ -427,7 +442,7 @@ class Main extends Component {
                   container
                   className={classes.grid}
                 >
-                  {data && data.length ? data.map(({ text: sub_text, value, color, percent, today, ytd, updown }, index) => (
+                  {data && data.length ? data.map(({ text: sub_text, value, color, percent, today, ytd, updown, patient }, index) => (
                     <Grid item xs={12} md={4} key={index}>
                       <Paper className={classes.paper}>
                         <div className={classes.box}>
@@ -460,6 +475,8 @@ class Main extends Component {
                             variant="body2"
                             gutterBottom
                           >
+                            {patient ? `អ្នកជំងឺ: ${patient}នាក់` : ''}
+                            {patient && (today || percent) ? ', ' : ''}
                             {today ? `+${today}` : ''}
                             {today && percent ? ', ' : ''}
                             {percent ? `(${percent}%)` : ''}                            
