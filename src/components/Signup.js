@@ -18,8 +18,6 @@ import ListItemText from "@material-ui/core/ListItemText";
 import DoneIcon from "@material-ui/icons/Done";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Fade from "@material-ui/core/Fade";
-import Back from "./common/Back";
-import clsx from 'clsx';
 import InputLabel from '@material-ui/core/InputLabel';
 import InputAdornment from '@material-ui/core/InputAdornment';
 import Visibility from '@material-ui/icons/Visibility';
@@ -36,7 +34,10 @@ import Divider from '@material-ui/core/Divider';
 // import DialogContent from '@material-ui/core/DialogContent';
 import FacebookIcon from '@material-ui/icons/Facebook';
 import FacebookLogin from 'react-facebook-login';
+import GoogleLogin from 'react-google-login';
+import clsx from 'clsx';
 import axios from 'axios';
+import Back from "./common/Back";
 import inMemoryJWTManager from '../inMemoryJwt';
 
 const backgroundShape = require("../images/shape.svg");
@@ -129,6 +130,22 @@ const styles = theme => ({
     overflow: 'hidden',
     textOverflow: 'ellipsis',
   },
+  googleLoginButton: {
+    padding: "8px",
+    width: "100%",
+    fontSize: "0.9375rem",
+    transition: "background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms",
+    fontFamily: "inherit !important",
+    fontWeight: 500,
+    lineHeight: "1.75",
+    borderRadius: "4px !important",
+    justifyContent: "center",
+    cursor: "pointer",
+    marginBottom: theme.spacing(2),
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
+  },
   facebookLoginButton: {
     padding: "8px",
     fontSize: "0.9375rem",
@@ -145,6 +162,9 @@ const styles = theme => ({
     border: 0,
     cursor: "pointer",
     margin: 0,
+    whiteSpace: "nowrap",
+    overflow: "hidden",
+    textOverflow: "ellipsis",
   },
   facebookIcon: {
     marginRight: "8px",    
@@ -204,6 +224,7 @@ class Signup extends Component {
     errorMessage: {},
     dialogOpen: false,
     buttonDisabled: false,
+    disableSocialButtons: false,
   };
 
   handleNext = () => {
@@ -311,14 +332,35 @@ class Signup extends Component {
 
   responseFacebook = ({ accessToken: access_token }) => {
     if (access_token) {
+      this.setState({ disableSocialButtons: true, buttonDisabled: true });
       axios.post(`${this.state.expressAPIUrl}/v1/auth/facebook`, { access_token })
         .then(({ data }) => {
           inMemoryJWTManager.setToken(data);
           this.handleNext();
+          this.setState({ disableSocialButtons: false, buttonDisabled: false });
         })
         .catch(err => {
           const { response: { data } } = err;
           this.handleError(data);
+          this.setState({ disableSocialButtons: false, buttonDisabled: false });
+        });
+    }
+    return false;
+  };
+
+  responseGoogle = ({ accessToken: access_token }) => {
+    if (access_token) {
+      this.setState({ disableSocialButtons: true, buttonDisabled: true });
+      axios.post(`${this.state.expressAPIUrl}/v1/auth/google`, { access_token })
+        .then(({ data }) => {
+          inMemoryJWTManager.setToken(data);
+          this.handleNext();
+          this.setState({ disableSocialButtons: false, buttonDisabled: false });
+        })
+        .catch(err => {
+          const { response: { data } } = err;
+          this.handleError(data);
+          this.setState({ disableSocialButtons: false, buttonDisabled: false });
         });
     }
     return false;
@@ -339,7 +381,7 @@ class Signup extends Component {
   render() {
     const { classes } = this.props;
     const steps = getSteps();
-    const { activeStep, loading, values, errorMessage, buttonDisabled } = this.state;
+    const { activeStep, loading, values, errorMessage, buttonDisabled, disableSocialButtons } = this.state;
     let user = {};
     const token = inMemoryJWTManager.getToken();
     if (token) {
@@ -447,6 +489,15 @@ class Signup extends Component {
                   {activeStep === 1 && (
                     <div className={classes.smallContainer}>
                       <Paper className={classes.paper}>
+                        <GoogleLogin
+                          clientId="182967407939-1qlgmahe2o06v5uj9rcof7kiaedvrf1i.apps.googleusercontent.com"
+                          buttonText="ចូលប្រព័ន្ធតាមហ្គូហ្គល"
+                          onSuccess={this.responseGoogle}
+                          onFailure={this.responseGoogle}
+                          className={classes.googleLoginButton}
+                          cookiePolicy={'single_host_origin'}
+                          disabled={disableSocialButtons}
+                        />
                         <FacebookLogin
                           appId="162878389053284"
                           fields="name,email,picture"
@@ -454,6 +505,7 @@ class Signup extends Component {
                           cssClass={classes.facebookLoginButton}
                           icon={(<FacebookIcon className={classes.facebookIcon} />)}
                           textButton="ចូលប្រព័ន្ធតាមហ្វេសប៊ុក"
+                          isDisabled={disableSocialButtons}
                         />
                         <Box display="flex" p={1} alignItems="center" className={classes.divideFlex}>
                           <Box p={1} flexGrow={1} className={classes.noPadding}>
