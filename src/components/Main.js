@@ -352,7 +352,7 @@ class Main extends Component {
     let updown = first - second;
     let text = '';
     let updownCal = Math.abs((Math.abs(updown) / second) * 100).toFixed(2);
-    text = updown > 0 ? 'កើន ' : 'ថយ ';
+    text = updown > 0 ? 'កើន ' : (updown < 0 ? 'ថយ ' : 'ថេរ ');
     updown = this.numberFormat(Math.abs(updown));
     if (langLocale === 'kh') {
       updown = this.numberTranslate(updown);

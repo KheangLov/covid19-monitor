@@ -17,11 +17,17 @@ import DialogActions from '@material-ui/core/DialogActions';
 import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Fade from "@material-ui/core/Fade";
+import Snackbar from '@material-ui/core/Snackbar';
+import MuiAlert from '@material-ui/lab/Alert';
 import CircularProgress from "@material-ui/core/CircularProgress";
 import Pagination from '@material-ui/lab/Pagination';
 import axios from 'axios';
 import _ from 'lodash';
 import inMemoryJWTManager from '../../inMemoryJwt';
+
+const Alert = props => {
+  return <MuiAlert elevation={6} variant="filled" {...props} />;
+}
 
 const styles = theme => ({
   paper: {
@@ -112,6 +118,7 @@ class CardItem extends Component {
     page: 1,
     totalEntries: 0,
     totalPages: 0,
+    snackbarMessage: '',
   };
 
   componentDidMount() {
@@ -258,9 +265,22 @@ class CardItem extends Component {
     this.setState({ dialogOpen: obj });
   };
 
+  handleGetDialyCase = () => {
+    axios.get('https://flask-covid19-api-script.herokuapp.com/api/run_script')
+      .then(res => this.setState({ snackbarMessage: res.message }))
+      .catch(err => {
+        this.setState({ buttonDisabled: false });
+        if (err.response && err.response.data) {
+          this.handleError(err.response.data);
+        }
+      });
+  };
+
+  handleClose = () => this.setState({ snackbarMessage: '' });
+
   render() {
     const { classes, type } = this.props;
-    const { errorMessage, createdStatus, updatedStatus, buttonDisabled, dataList, edit, formData, dialogOpen, loading, page, totalPages, isLoading } = this.state;
+    const { errorMessage, createdStatus, updatedStatus, buttonDisabled, dataList, edit, formData, dialogOpen, loading, page, totalPages, isLoading, snackbarMessage } = this.state;
     const token = inMemoryJWTManager.getToken();
     const { user } = JSON.parse(token);
     const currentDate = this.getCurrentDate();
@@ -410,7 +430,16 @@ class CardItem extends Component {
                     Add cases for -&nbsp;
                     <span style={{ color: 'rgba(0, 0, 0, 0.54)' }}>
                       {edit ? this.getCurrentDate(formData.date) : currentDate}
+                    </span> 
+                    &nbsp;-&nbsp;
+                    <span onClick={this.handleGetDialyCase} style={{ fontSize: 16, cursor: 'pointer' }}>
+                      Get dialy cases
                     </span>
+                    <Snackbar open={snackbarMessage ? true : false} autoHideDuration={5000} onClose={this.handleClose}>
+                      <Alert onClose={this.handleClose} severity="success">
+                        {snackbarMessage}
+                      </Alert>
+                    </Snackbar>
                   </Typography>
                 </Grid>
                 <Grid item xs={12}>
