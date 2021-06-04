@@ -267,7 +267,7 @@ class CardItem extends Component {
 
   handleGetDialyCase = () => {
     axios.get('https://flask-covid19-api-script.herokuapp.com/api/run_script')
-      .then(res => this.setState({ snackbarMessage: res.message }))
+      .then(({ data: { message } }) => this.setState({ snackbarMessage: message }))
       .catch(err => {
         this.setState({ buttonDisabled: false });
         if (err.response && err.response.data) {
@@ -276,7 +276,7 @@ class CardItem extends Component {
       });
   };
 
-  handleClose = () => this.setState({ snackbarMessage: '' });
+  handleCloseSnackbar = () => this.setState({ snackbarMessage: '' });
 
   render() {
     const { classes, type } = this.props;
@@ -435,8 +435,13 @@ class CardItem extends Component {
                     <span onClick={this.handleGetDialyCase} style={{ fontSize: 16, cursor: 'pointer' }}>
                       Get dialy cases
                     </span>
-                    <Snackbar open={snackbarMessage ? true : false} autoHideDuration={5000} onClose={this.handleClose}>
-                      <Alert onClose={this.handleClose} severity="success">
+                    <Snackbar 
+                      anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
+                      open={snackbarMessage ? true : false} 
+                      autoHideDuration={5000} 
+                      onClose={this.handleCloseSnackbar}
+                    >
+                      <Alert onClose={this.handleCloseSnackbar} severity="success">
                         {snackbarMessage}
                       </Alert>
                     </Snackbar>
