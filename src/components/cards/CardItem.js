@@ -426,12 +426,13 @@ class CardItem extends Component {
             <div className={classes.itemContainer}>
               <Grid container>
                 <Grid item xs={12}>
-                  <Typography style={{ marginBottom: '1rem' }} color='secondary' gutterBottom>
+                  <Typography style={{ marginBottom: 0 }} color='secondary' gutterBottom>
                     Add cases for -&nbsp;
                     <span style={{ color: 'rgba(0, 0, 0, 0.54)' }}>
                       {edit ? this.getCurrentDate(formData.date) : currentDate}
                     </span> 
-                    &nbsp;-&nbsp;
+                  </Typography>
+                  <Typography style={{ marginBottom: '1rem' }} color='textSecondary' gutterBottom>
                     <span onClick={this.handleGetDialyCase} style={{ fontSize: 16, cursor: 'pointer' }}>
                       Get dialy cases
                     </span>
