@@ -434,7 +434,7 @@ class CardItem extends Component {
                   </Typography>
                   <Typography style={{ marginBottom: '1rem' }} color='textSecondary' gutterBottom>
                     <span onClick={this.handleGetDialyCase} style={{ fontSize: 16, cursor: 'pointer' }}>
-                      Get dialy cases
+                      Get daily cases
                     </span>
                     <Snackbar 
                       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
