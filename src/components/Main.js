@@ -92,6 +92,17 @@ const styles = theme => ({
     top: "40%",
     left: "40%"
   },
+  topTextResponsive: {
+    [theme.breakpoints.down("xs")]: {      
+      marginBottom: '0.5rem !important',
+    }
+  },
+  textReponsive: {    
+    [theme.breakpoints.down("xs")]: {
+      fontSize: '2.3rem !important',
+      marginBottom: '0.5rem !important',
+    }
+  }
 });
 
 class Main extends Component {
@@ -447,6 +458,7 @@ class Main extends Component {
                       <Paper className={classes.paper}>
                         <div className={classes.box}>
                           <Typography
+                            className={classes.topTextResponsive}
                             style={{ textTransform: "capitalize", marginBottom: '0.1em' }}
                             gutterBottom
                             align="center"
@@ -454,7 +466,8 @@ class Main extends Component {
                             {sub_text}
                           </Typography>
                           <Tooltip title="ចុចលើលេខដើម្បីប្តូរភាសា">
-                            <Typography 
+                            <Typography
+                              className={classes.textReponsive}                              
                               style={{ color, marginBottom: '0.1em' }}
                               align="center"
                               variant="h3"
