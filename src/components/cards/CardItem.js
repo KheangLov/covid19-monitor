@@ -119,6 +119,7 @@ class CardItem extends Component {
     totalEntries: 0,
     totalPages: 0,
     snackbarMessage: '',
+    isGettingDaily: false,
   };
 
   componentDidMount() {
@@ -266,10 +267,11 @@ class CardItem extends Component {
   };
 
   handleGetDialyCase = () => {
+    this.setState({ isGettingDaily: true });
     axios.get('https://flask-covid19-api-script.herokuapp.com/api/run_script')
-      .then(({ data: { message } }) => this.setState({ snackbarMessage: message }))
+      .then(({ data: { message } }) => this.setState({ snackbarMessage: message, isGettingDaily: false }))
       .catch(err => {
-        this.setState({ buttonDisabled: false });
+        this.setState({ buttonDisabled: false, isGettingDaily: false });
         if (err.response && err.response.data) {
           this.handleError(err.response.data);
         }
@@ -280,7 +282,7 @@ class CardItem extends Component {
 
   render() {
     const { classes, type } = this.props;
-    const { errorMessage, createdStatus, updatedStatus, buttonDisabled, dataList, edit, formData, dialogOpen, loading, page, totalPages, isLoading, snackbarMessage } = this.state;
+    const { errorMessage, createdStatus, updatedStatus, buttonDisabled, dataList, edit, formData, dialogOpen, loading, page, totalPages, isLoading, snackbarMessage, isGettingDaily } = this.state;
     const token = inMemoryJWTManager.getToken();
     const { user } = JSON.parse(token);
     const currentDate = this.getCurrentDate();
@@ -433,9 +435,27 @@ class CardItem extends Component {
                     </span> 
                   </Typography>
                   <Typography style={{ marginBottom: '1rem' }} color='textSecondary' gutterBottom>
-                    <span onClick={this.handleGetDialyCase} style={{ fontSize: 16, cursor: 'pointer' }}>
-                      Get daily cases
-                    </span>
+                    {!isGettingDaily ? (
+                      <Fade
+                        in={!isGettingDaily}
+                        style={{
+                          transitionDelay: !isGettingDaily ? "100ms" : "0ms",              
+                        }}
+                      >
+                        <span onClick={this.handleGetDialyCase} style={{ fontSize: 16, cursor: 'pointer' }}>
+                          Get daily cases
+                        </span>
+                      </Fade>
+                    ) : (
+                      <Fade
+                        in={isGettingDaily}
+                        style={{
+                          transitionDelay: isGettingDaily ? "100ms" : "0ms",              
+                        }}
+                      >
+                        <CircularProgress size="20px" style={{ marginTop: 8 }} />
+                      </Fade>
+                    )}
                     <Snackbar 
                       anchorOrigin={{ vertical: 'top', horizontal: 'right' }}
                       open={snackbarMessage ? true : false} 
