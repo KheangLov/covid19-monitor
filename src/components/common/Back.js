@@ -12,6 +12,9 @@ const styles = theme => ({
   text: {
     display: 'inline-block',
     verticalAlign: 'text-bottom'
+  },
+  iconCustom: {
+    fontSize: "24px !important"
   }
 });
 
@@ -22,7 +25,7 @@ class Back extends Component {
       <div>
         <Typography variant="h6" gutterBottom>
           <Link className={classes.link} href="/">
-            <KeyboardArrowLeft />
+            <KeyboardArrowLeft classes={{ root: classes.iconCustom }} />
             <span className={classes.text}>ថយទៅទិន្នន័យ</span>
           </Link>
         </Typography>

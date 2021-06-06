@@ -6,6 +6,10 @@ let Menu = [
     pathname: "/"
   },
   {
+    label: "ផ្ទាំងគ្រប់គ្រង",
+    pathname: "/dashboard"
+  },
+  {
     label: "ទិន្នន័យក្នុងប្រព័ន្ធ",
     pathname: "/data-list"
   },
