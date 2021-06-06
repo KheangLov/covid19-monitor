@@ -1,14 +1,36 @@
 import React, { Component }from "react";
 import Typography from "@material-ui/core/Typography";
+import withStyles from "@material-ui/styles/withStyles";
 import {
     PieChart,
     Pie,
     Cell,
     Sector,
     ResponsiveContainer,
-    Legend
+    Legend,
+    Tooltip
 } from "recharts";
 import inMemoryJWTManager from '../inMemoryJwt';
+
+const styles = theme => ({
+    pieOut: {
+        [theme.breakpoints.down('xs')]: {
+            display: 'none',
+        },
+        [theme.breakpoints.up('sm')]: {
+            display: 'block',
+        },
+    },
+    pieIn: {
+        [theme.breakpoints.down('xs')]: {
+            display: 'block',
+        },
+        [theme.breakpoints.up('sm')]: {
+            display: 'none',
+        },
+    }
+});
+
 
 class SimplePieChart extends Component {
   state = {
@@ -97,7 +119,7 @@ class SimplePieChart extends Component {
   };
 
   render() {
-    const { data, title } = this.props;
+    const { data, title, classes } = this.props;
     return (
       <React.Fragment>
         {title && (
@@ -110,7 +132,7 @@ class SimplePieChart extends Component {
                 {title}
             </Typography>
         )}
-        <ResponsiveContainer width="100%" height={300}>
+        <ResponsiveContainer width="100%" height={300} className={classes.pieOut}>
             <PieChart margin={{ top: 10, right: 20, left: 20, bottom: 20 }}>
                 <Pie
                     isAnimationActive={true} 
@@ -121,7 +143,6 @@ class SimplePieChart extends Component {
                     activeShape={this.renderActiveShape}
                     dataKey="value"
                     data={data}
-                    label={this.renderCustomizedLabel}
                     cx="50%"
                     cy="50%"
                     innerRadius={60}
@@ -141,9 +162,38 @@ class SimplePieChart extends Component {
                 />
             </PieChart>
         </ResponsiveContainer>
+        <ResponsiveContainer width="100%" height={300} className={classes.pieIn}>
+            <PieChart margin={{ top: 10, right: 20, left: 20, bottom: 20 }}>
+                <Pie
+                    data={data}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    outerRadius={80}
+                    fill="#8884d8"
+                    dataKey="value"
+                >
+                    {data && data.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                </Pie>
+                <Legend     
+                    wrapperStyle={{
+                        bottom: 0
+                    }} 
+                />
+                <Tooltip 
+                    contentStyle={{ 
+                        backgroundColor: 'rgba(255,255,255, 0.8)',
+                        borderColor: '#eaeaea',
+                    }}
+                    formatter={(value, name) => [this.numberTranslate(this.numberFormat(value)), name]} 
+                />
+            </PieChart>
+        </ResponsiveContainer>
       </React.Fragment>
     );
   }
 }
 
-export default SimplePieChart;
+export default withStyles(styles)(SimplePieChart);

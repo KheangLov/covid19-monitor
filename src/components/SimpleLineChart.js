@@ -62,6 +62,10 @@ class SimpleLineChart extends Component {
             <YAxis dataKey="case" tickFormatter={value => this.numberTranslate(value)} />
             <CartesianGrid strokeDasharray="3 3" />
             <Tooltip
+              contentStyle={{ 
+                backgroundColor: 'rgba(255,255,255, 0.8)',
+                borderColor: '#eaeaea',
+              }}
               formatter={value => {
                 return [this.numberTranslate(this.numberFormat(value)), 'ករណី'];
               }}
