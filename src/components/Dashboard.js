@@ -192,20 +192,20 @@ class Dashboard extends Component {
     await axios.get(`${expressAPIUrl}/v1/cases`, { params: { perPage: 0, dateRange } })
         .then(({ data: { data } }) => {
             const originalData = _.orderBy(data, ['date'], ['asc']);
-            const daysText = `${this.numberTranslate(30)} ថ្ងែចុងក្រោយ`
+            const daysText = `${this.numberTranslate(30)} ថ្ងៃចុងក្រោយ`
             const lineData = {
                 caseData: {
-                    title: `ក្រាបករណីឆ្លង ${daysText}`, 
+                    title: `ករណីឆ្លង ${daysText}`, 
                     data: [],
                     color: '#ff9800'
                 },
                 caseDeath: {
-                    title: `ក្រាបករណីស្លាប់ ${daysText}`, 
+                    title: `ករណីស្លាប់ ${daysText}`, 
                     data: [],
                     color: '#ec314b'
                 },
                 caseRecovered: {
-                    title: `ក្រាបករណីជា ${daysText}`, 
+                    title: `ករណីជា ${daysText}`, 
                     data: [],
                     color: '#05b584'
                 },
