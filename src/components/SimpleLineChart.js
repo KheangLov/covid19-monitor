@@ -49,7 +49,7 @@ class SimpleLineChart extends Component {
     return (
       <React.Fragment>
         <Typography 
-          style={{ marginTop: "0", lineHeight: "1.7", marginBottom: "1rem" }}
+          style={{ marginTop: "0", lineHeight: "1.25", marginBottom: "1rem" }}
           variant="h4"
           align="center"
           color="textPrimary"

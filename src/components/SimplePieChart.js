@@ -124,7 +124,7 @@ class SimplePieChart extends Component {
       <React.Fragment>
         {title && (
             <Typography 
-                style={{ margin: "0", lineHeight: "1.7" }}
+                style={{ margin: "0", lineHeight: "1.25" }}
                 variant="h4"
                 align="center"
                 color="textPrimary"
