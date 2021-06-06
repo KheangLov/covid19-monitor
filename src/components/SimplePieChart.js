@@ -165,6 +165,10 @@ class SimplePieChart extends Component {
         <ResponsiveContainer width="100%" height={300} className={classes.pieIn}>
             <PieChart margin={{ top: 10, right: 20, left: 20, bottom: 20 }}>
                 <Pie
+                    isAnimationActive={true} 
+                    animationBegin={0}
+                    animationDuration={1500}
+                    animationEasing="ease-in-out"
                     data={data}
                     cx="50%"
                     cy="50%"
