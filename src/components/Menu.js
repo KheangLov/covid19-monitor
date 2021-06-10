@@ -2,7 +2,7 @@ import inMemoryJWTManager from '../inMemoryJwt';
 
 let Menu = [
   {
-    label: "ទិន្នន័យ",
+    label: "ទិន្នន័",
     pathname: "/"
   },
   {
