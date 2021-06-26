@@ -6,8 +6,11 @@ import ScrollToTop from './components/ScrollTop'
 import Cards from './components/Cards'
 import PageNotFound from './components/PageNotFound';
 import Dashboard from './components/Dashboard';
+import useGaTracker from './useGaTracker';
 
-export default props => (
+export default props => {
+  useGaTracker();
+  return (
     <HashRouter>
       <ScrollToTop>
         <Switch>
@@ -19,4 +22,5 @@ export default props => (
         </Switch>
       </ScrollToTop>
     </HashRouter>
-  )
+  );
+}
