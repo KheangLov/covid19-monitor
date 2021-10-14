@@ -7,7 +7,7 @@ import Cards from './components/Cards'
 import PageNotFound from './components/PageNotFound';
 import Dashboard from './components/Dashboard';
 
-export default props => {  
+export default () => {  
   return (
     <HashRouter>
       <ScrollToTop>
